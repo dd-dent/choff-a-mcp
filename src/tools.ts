@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CHOFFParser } from './parser/index.js';
 
 export interface MCPTool<T = unknown> {
   name: string;
@@ -45,6 +46,7 @@ const getAnchorsSchema = z.object({
   type: z.enum(['decision', 'blocker', 'breakthrough', 'question']).optional(),
   resolved: z.boolean().optional(),
   limit: z.number().optional(),
+  content: z.string().optional(), // For parsing CHOFF from provided content
 });
 
 // Tool implementations
@@ -75,21 +77,56 @@ export function createSaveCheckpointTool(): MCPTool<
       required: ['content'],
     },
     handler: (args): ToolResult<unknown> => {
-      // Ensure we have valid input
-      const input = args || { content: '' };
-      const validated = saveCheckpointSchema.parse(input);
+      try {
+        // Validate input
+        const input = args || { content: '' };
+        const validated = saveCheckpointSchema.parse(input);
 
-      // For now, just return a mock checkpoint ID
-      const checkpointId = `chk_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        // Parse CHOFF content
+        const parser = new CHOFFParser();
+        const choffDocument = parser.parse(validated.content);
 
-      return {
-        success: true,
-        data: {
-          checkpointId,
-          tokensProcessed: validated.content.split(' ').length,
-          anchorsExtracted: validated.extractAnchors ? 0 : undefined,
-        },
-      };
+        // Generate checkpoint ID
+        const checkpointId = `chk_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+        // Extract basic statistics
+        const tokensProcessed = validated.content.split(/\s+/).length;
+        const anchorsExtracted = validated.extractAnchors
+          ? choffDocument.statistics.totalMarkers
+          : undefined;
+
+        return {
+          success: true,
+          data: {
+            checkpointId,
+            tokensProcessed,
+            anchorsExtracted,
+            choffMetadata: {
+              totalMarkers: choffDocument.statistics.totalMarkers,
+              markerDensity: choffDocument.statistics.markerDensity,
+              dominantStateType: choffDocument.statistics.dominantStateType,
+              branchComplexity: choffDocument.statistics.branchComplexity,
+              parseTime: choffDocument.parseTime,
+              errors: choffDocument.errors.length,
+            },
+            states: choffDocument.states.length,
+            contexts: choffDocument.contexts.length,
+            patterns: choffDocument.patterns.length,
+            directionals: choffDocument.directionals.length,
+            branches: choffDocument.branches.length,
+            socialLayers: choffDocument.socialLayers.length,
+          },
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: {
+            code: 'PARSE_ERROR',
+            message: `Failed to parse CHOFF content: ${error instanceof Error ? error.message : String(error)}`,
+            retryable: false,
+          },
+        };
+      }
     },
   };
 }
@@ -173,20 +210,142 @@ export function createGetAnchorsTool(): MCPTool<
           description: 'Maximum number of anchors to return',
           default: 50,
         },
+        content: {
+          type: 'string',
+          description: 'CHOFF-annotated content to extract anchors from',
+        },
       },
     },
     handler: (args): ToolResult<unknown> => {
-      const validated = getAnchorsSchema.parse(args);
+      try {
+        const validated = getAnchorsSchema.parse(args);
 
-      // For now, return empty anchors
-      return {
-        success: true,
-        data: {
-          anchors: [],
-          total: 0,
-          filters: validated,
-        },
-      };
+        if (!validated.content) {
+          return {
+            success: true,
+            data: {
+              anchors: [],
+              total: 0,
+              filters: validated,
+              message: 'No content provided for anchor extraction',
+            },
+          };
+        }
+
+        // Parse CHOFF content
+        const parser = new CHOFFParser();
+        const choffDocument = parser.parse(validated.content);
+
+        // Extract semantic anchors from CHOFF markers
+        const anchors = [];
+
+        // Map state markers to semantic anchors
+        for (const state of choffDocument.states) {
+          let anchorType: string | null = null;
+          const confidence = 0.8; // Base confidence for state-based anchors
+
+          if (state.type === 'simple') {
+            const value = state.value.toLowerCase();
+            if (value.includes('decisive') || value.includes('decided')) {
+              anchorType = 'decision';
+            } else if (value.includes('blocked') || value.includes('stuck')) {
+              anchorType = 'blocker';
+            } else if (
+              value.includes('eureka') ||
+              value.includes('breakthrough')
+            ) {
+              anchorType = 'breakthrough';
+            } else if (
+              value.includes('questioning') ||
+              value.includes('curious')
+            ) {
+              anchorType = 'question';
+            }
+          }
+
+          if (
+            anchorType &&
+            (!validated.type || validated.type === anchorType)
+          ) {
+            anchors.push({
+              id: `anchor_${anchors.length + 1}`,
+              type: anchorType,
+              confidence,
+              position: state.position,
+              content: state.raw,
+              context: 'state_marker',
+              resolved: false, // Default to unresolved
+            });
+          }
+        }
+
+        // Map pattern markers to semantic anchors
+        for (const pattern of choffDocument.patterns) {
+          let anchorType: string | null = null;
+          const confidence = 0.7; // Slightly lower confidence for pattern-based anchors
+
+          const category = pattern.category.toLowerCase();
+          if (category.includes('decision') || category.includes('choice')) {
+            anchorType = 'decision';
+          } else if (category.includes('block') || category.includes('stuck')) {
+            anchorType = 'blocker';
+          } else if (
+            category.includes('breakthrough') ||
+            category.includes('solution')
+          ) {
+            anchorType = 'breakthrough';
+          } else if (
+            category.includes('question') ||
+            category.includes('inquiry')
+          ) {
+            anchorType = 'question';
+          }
+
+          if (
+            anchorType &&
+            (!validated.type || validated.type === anchorType)
+          ) {
+            anchors.push({
+              id: `anchor_${anchors.length + 1}`,
+              type: anchorType,
+              confidence,
+              position: pattern.position,
+              content: pattern.raw,
+              context: 'pattern_marker',
+              resolved:
+                pattern.flow === 'completed' || pattern.flow === 'resolved',
+            });
+          }
+        }
+
+        // Apply limit
+        const limitedAnchors = validated.limit
+          ? anchors.slice(0, validated.limit)
+          : anchors;
+
+        return {
+          success: true,
+          data: {
+            anchors: limitedAnchors,
+            total: anchors.length,
+            filters: validated,
+            choffStats: {
+              totalMarkers: choffDocument.statistics.totalMarkers,
+              parseTime: choffDocument.parseTime,
+              errors: choffDocument.errors.length,
+            },
+          },
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: {
+            code: 'ANCHOR_EXTRACTION_ERROR',
+            message: `Failed to extract anchors: ${error instanceof Error ? error.message : String(error)}`,
+            retryable: false,
+          },
+        };
+      }
     },
   };
 }

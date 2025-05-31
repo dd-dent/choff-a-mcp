@@ -8,9 +8,9 @@
 ## Current Status Overview
 
 ```
-Phase 1: ████████░░░░░░░░░░░░░░░░ 40% Complete
+Phase 1: ██████████░░░░░░░░░░░░░░ 50% Complete
 - Prompt 1.1: ✅ DONE (Project Initialization)
-- Prompt 1.2: 🚧 IMPL (CHOFF Parser - needs commit)
+- Prompt 1.2: ✅ DONE (CHOFF Parser - committed!)
 - Prompt 1.3: ❌ TODO (Memory Storage Layer)
 - Prompt 1.4: ❌ TODO (Semantic Anchor Detection)
 - Prompt 1.5: ❌ TODO (Basic MCP Tools)
@@ -18,11 +18,11 @@ Phase 1: ████████░░░░░░░░░░░░░░░�
 
 ## Immediate Next Actions
 
-### 🔥 URGENT: Complete Prompt 1.2 Integration
+### 🔥 CURRENT: Integrate Parser with MCP Tools
 
-- [ ] **Commit the CHOFF parser** (src/parser/ + tests are implemented but uncommitted)
+- [x] **Commit the CHOFF parser** (✅ DONE - commit 251c48f)
 - [ ] **Integrate parser with MCP tools** (replace mock implementations in server.ts)
-- [ ] **Update prompt_plan.md** to mark Prompt 1.2 as completed
+- [x] **Update prompt_plan.md** (✅ DONE - marked as completed)
 
 ### 📋 Phase 1 Remaining Work
 
