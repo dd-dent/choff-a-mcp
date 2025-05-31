@@ -1,10 +1,11 @@
 # CHOFF-A-MCP (Anamnesis) Implementation Prompt Plan
-{document:prompt_plan}[context:execution] {state:methodical[0.9]|tdd_focused[1.0]}
 
+{document:prompt_plan}[context:execution] {state:methodical[0.9]|tdd_focused[1.0]}
 
 ## Phase 1: Foundation (Local JSON Storage)
 
 ### Prompt 1.0: CHOFF Parser Research Spike
+
 ```
 Research and implement a proper parser for CHOFF v2.5 notation that handles complex nested structures.
 
@@ -36,11 +37,12 @@ Commit: "feat: Implement robust CHOFF v2.5 parser with full spec support"
 ```
 
 ### Prompt 1.1: Project Initialization
+
 ```
-Create a new TypeScript project for an MCP server called "choff-a-mcp". 
+Create a new TypeScript project for an MCP server called "choff-a-mcp".
 Initialize with:
 - TypeScript with strict mode
-- Vitest for testing  
+- Vitest for testing
 - ESLint and Prettier
 - Pre-commit hooks using husky
 - Initial folder structure: src/, tests/, docs/
@@ -59,6 +61,7 @@ Commit with message: "feat: Initialize CHOFF-A-MCP (Anamnesis) project with basi
 ```
 
 ### Prompt 1.2: CHOFF Parser Core
+
 ```
 Implement a CHOFF v2.5 parser that extracts semantic metadata from text.
 
@@ -78,6 +81,7 @@ Commit: "feat: Implement CHOFF v2.5 parser with comprehensive test coverage"
 ```
 
 ### Prompt 1.3: Memory Storage Layer
+
 ```
 Create a JSON-based storage system for conversation memory.
 
@@ -91,7 +95,7 @@ Write tests for:
 
 Implement using a simple file-based approach with:
 - conversations.json for main storage
-- atomic writes to prevent corruption  
+- atomic writes to prevent corruption
 - automatic daily backups
 - maximum file size limits (rotate at 10MB)
 
@@ -100,6 +104,7 @@ Commit: "feat: Add JSON-based conversation storage with CHOFF metadata"
 ```
 
 ### Prompt 1.4: Semantic Anchor Detection
+
 ```
 Implement semantic anchor extraction from CHOFF-annotated text.
 
@@ -117,6 +122,7 @@ Commit: "feat: Add semantic anchor detection with confidence scoring"
 ```
 
 ### Prompt 1.5: Basic MCP Tools
+
 ```
 Implement the core MCP tools for memory management.
 
@@ -139,6 +145,7 @@ Commit: "feat: Implement core MCP tools for memory operations"
 ## Phase 2: Semantic Intelligence
 
 ### Prompt 2.1: Vector Embedding Pipeline
+
 ```
 Add vector embedding generation for semantic search.
 
@@ -160,6 +167,7 @@ Commit: "feat: Add vector embedding pipeline for semantic search"
 ```
 
 ### Prompt 2.2: Pinecone Integration
+
 ```
 Integrate Pinecone for vector storage and similarity search.
 
@@ -180,6 +188,7 @@ Commit: "feat: Integrate Pinecone for vector similarity search"
 ```
 
 ### Prompt 2.3: Advanced Retrieval Algorithm
+
 ```
 Implement the hybrid retrieval algorithm combining multiple signals.
 
@@ -193,7 +202,7 @@ Write tests for:
 
 Algorithm should:
 - Weight semantic similarity at 40%
-- Weight recency at 30%  
+- Weight recency at 30%
 - Weight anchor importance at 30%
 - Support custom weight overrides
 - Return results with explanation
@@ -203,6 +212,7 @@ Commit: "feat: Implement hybrid retrieval algorithm with smart ranking"
 ```
 
 ### Prompt 2.4: Pattern Recognition
+
 ```
 Add pattern detection across conversation history.
 
@@ -222,6 +232,7 @@ Commit: "feat: Add cross-conversation pattern recognition"
 ```
 
 ### Prompt 2.5: PostgreSQL Migration
+
 ```
 Migrate from JSON to PostgreSQL with pgvector.
 
@@ -246,6 +257,7 @@ Commit: "feat: Migrate to PostgreSQL with pgvector support"
 ## Phase 3: Production Scale
 
 ### Prompt 3.1: Cloudflare Workers Setup
+
 ```
 Prepare the MCP server for Cloudflare Workers deployment.
 
@@ -268,6 +280,7 @@ Commit: "feat: Refactor for Cloudflare Workers compatibility"
 ```
 
 ### Prompt 3.2: Authentication & Security
+
 ```
 Implement comprehensive security measures.
 
@@ -291,6 +304,7 @@ Commit: "feat: Add authentication and security layers"
 ```
 
 ### Prompt 3.3: GitHub Integration
+
 ```
 Add GitHub integration for artifact versioning.
 
@@ -311,6 +325,7 @@ Commit: "feat: Integrate GitHub for artifact versioning"
 ```
 
 ### Prompt 3.4: Multi-tenant Architecture
+
 ```
 Add support for multiple projects and teams.
 
@@ -333,6 +348,7 @@ Commit: "feat: Add multi-tenant project support"
 ```
 
 ### Prompt 3.5: Production Monitoring
+
 ```
 Implement comprehensive observability.
 
@@ -358,6 +374,7 @@ Commit: "feat: Add production monitoring and observability"
 ## Bonus Prompts
 
 ### Prompt B.1: VS Code Extension
+
 ```
 Create a VS Code extension for CHOFF visualization.
 
@@ -377,6 +394,7 @@ Commit: "feat: Add VS Code extension for CHOFF visualization"
 ```
 
 ### Prompt B.2: Context Drift Detection
+
 ```
 Implement semantic drift monitoring across conversations.
 
@@ -395,12 +413,13 @@ Commit: "feat: Add semantic drift detection system"
 ```
 
 ### Prompt B.3: Auto-summarization
+
 ```
 Add intelligent conversation summarization.
 
 Write tests for:
 - Key point extraction
-- CHOFF metadata preservation  
+- CHOFF metadata preservation
 - Summary length optimization
 - Multi-conversation synthesis
 - Incremental summary updates
@@ -417,4 +436,4 @@ Commit: "feat: Add intelligent conversation summarization"
 ---
 
 {state:complete} &pattern:harper_methodology|implemented|
-*"Make it work, make it right, make it fast - in that order, with tests first."*
+_"Make it work, make it right, make it fast - in that order, with tests first."_
