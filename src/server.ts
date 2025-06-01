@@ -99,6 +99,13 @@ export class ChoffMCPServer {
       }
 
       // MCP expects the response to include content property
+      if (!result.success && result.error) {
+        throw new McpError(
+          ErrorCode.InternalError,
+          `Tool error: ${result.error.message}`,
+        );
+      }
+
       return {
         content: [
           {
@@ -156,6 +163,17 @@ export class ChoffMCPServer {
 
 // Main entry point
 export async function main(): Promise<void> {
+  // Parse command line arguments
+  const args = process.argv.slice(2);
+  const storagePathIndex = args.indexOf('--storage-path');
+
+  if (storagePathIndex !== -1 && storagePathIndex + 1 < args.length) {
+    const storagePath = args[storagePathIndex + 1];
+    // Import configureStorage and configure it
+    const { configureStorage } = await import('./tools.js');
+    configureStorage({ storageDir: storagePath });
+  }
+
   const server = new ChoffMCPServer();
   await server.run();
 }

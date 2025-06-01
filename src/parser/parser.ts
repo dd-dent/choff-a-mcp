@@ -14,7 +14,6 @@ import {
 
 export class CHOFFParser {
   private text: string = '';
-  private position: number = 0;
   private errors: ParseError[] = [];
 
   // Regular expressions for different CHOFF elements
@@ -58,7 +57,6 @@ export class CHOFFParser {
   parse(text: string): CHOFFDocument {
     const startTime = performance.now();
     this.text = text;
-    this.position = 0;
     this.errors = [];
 
     const document: CHOFFDocument = {
@@ -461,12 +459,12 @@ export class CHOFFParser {
         // Skip if this position was already matched by an enhanced operator
         const alreadyMatched = directionals.some(
           (d) =>
-            d.position.start <= match.index && d.position.end > match.index,
+            d.position.start <= match!.index && d.position.end > match!.index,
         );
 
         // Skip if this is part of a branch merge
         const partOfBranchMerge = branchMergePositions.some(
-          (pos) => match.index >= pos.start && match.index < pos.end,
+          (pos) => match!.index >= pos.start && match!.index < pos.end,
         );
 
         if (!alreadyMatched && !partOfBranchMerge) {
@@ -511,7 +509,7 @@ export class CHOFFParser {
     while ((initMatch = this.patterns.branchInit.exec(this.text))) {
       // Check if this init is within a merge
       const withinMerge = mergePositions.some(
-        (pos) => initMatch.index >= pos.start && initMatch.index < pos.end,
+        (pos) => initMatch!.index >= pos.start && initMatch!.index < pos.end,
       );
 
       if (!withinMerge) {

@@ -194,7 +194,7 @@ describe('CHOFFParser', () => {
       const doc = parser.parse(text);
 
       expect(doc.branches).toHaveLength(1);
-      expect(doc.branches[0].label).toBeUndefined();
+      expect((doc.branches[0] as any).label).toBeUndefined();
     });
 
     it('should parse branch merge', () => {
