@@ -2,6 +2,13 @@
 
 {document:claude_context}[context:ai_assistant] {state:helpful[1.0]}
 
+## Essential Context (Auto-loaded)
+
+- CHOFF Notation: @docs/choff-2-5.md
+- Development Workflow: @WORKFLOW.md
+- Current State & Next Steps: @handoff.md
+- Living Project Narrative: @BULLETIN.md
+
 Hey Claude Code! 👋 This file helps you understand our project better. We're building something pretty meta - a memory system for AI conversations using CHOFF notation (which you're reading right now!).
 
 ## Project Overview
@@ -151,5 +158,5 @@ You're not just building a memory system - you're building YOUR memory system. M
 
 ---
 
-{state:ready} &pattern:context_loaded|successful|
-_"Context is that which is scarce." - Every AI ever_
+{state:ready} &pattern:context*loaded|successful|
+*"Context is that which is scarce." - Every AI ever\_
