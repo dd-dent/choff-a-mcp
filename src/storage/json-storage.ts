@@ -135,11 +135,15 @@ export class JSONConversationStorage implements ConversationStorage {
 
       if (criteria.query) {
         const query = criteria.query.toLowerCase();
-        results = results.filter(
-          (entry) =>
-            entry.content.toLowerCase().includes(query) ||
-            entry.summary?.toLowerCase().includes(query),
-        );
+        const queryWords = query.split(/\s+/).filter((word) => word.length > 0);
+        results = results.filter((entry) => {
+          const lowerContent = entry.content.toLowerCase();
+          const lowerSummary = entry.summary?.toLowerCase() || '';
+          const searchText = lowerContent + ' ' + lowerSummary;
+
+          // Check if all query words are present
+          return queryWords.every((word) => searchText.includes(word));
+        });
       }
 
       // Sort by timestamp (newest first)

@@ -1,5 +1,33 @@
 import { z } from 'zod';
 import { CHOFFParser } from './parser/index.js';
+import { JSONConversationStorage } from './storage/json-storage.js';
+import { SemanticAnchorDetector } from './anchors/semantic-anchor-detector.js';
+import type { ConversationStorage, SearchCriteria } from './storage/types.js';
+import type { SemanticAnchor } from './anchors/types.js';
+
+// Tool response interfaces
+interface LoadContextResponse {
+  contexts: Array<{
+    conversationId: string;
+    content?: string;
+    summary?: string;
+    tags?: string[];
+    anchors?: SemanticAnchor[];
+    metadata: {
+      anchors?: SemanticAnchor[];
+    };
+    timestamp: Date;
+  }>;
+  totalTokens: number;
+  query?: string;
+}
+
+interface GetAnchorsResponse {
+  anchors: SemanticAnchor[];
+  total: number;
+  filters: z.infer<typeof getAnchorsSchema>;
+  source: string;
+}
 
 export interface MCPTool<T = unknown> {
   name: string;
@@ -49,6 +77,73 @@ const getAnchorsSchema = z.object({
   content: z.string().optional(), // For parsing CHOFF from provided content
 });
 
+const clearMemorySchema = z.object({
+  confirm: z.boolean(),
+  beforeDate: z.string().datetime().optional(),
+});
+
+// Singleton storage instance
+let storageInstance: ConversationStorage | null = null;
+
+// Storage configuration (can be set for testing)
+let storageConfig: { storageDir?: string; storagePath?: string } = {};
+
+export function configureStorage(config: {
+  storageDir?: string;
+  storagePath?: string;
+}): void {
+  storageConfig = config;
+  storageInstance = null; // Reset instance to use new config
+}
+
+function getStorage(): ConversationStorage {
+  if (!storageInstance) {
+    // Use explicit storagePath if provided, otherwise build from storageDir
+    const storageFile =
+      storageConfig.storagePath ||
+      ((): string => {
+        const storageDir = storageConfig.storageDir || './conversations';
+        return storageDir.endsWith('.json')
+          ? storageDir
+          : `${storageDir}/conversations.json`;
+      })();
+    storageInstance = new JSONConversationStorage(storageFile);
+  }
+  return storageInstance;
+}
+
+// For testing purposes - reset storage instance
+export function resetStorage(): void {
+  storageInstance = null;
+}
+
+// Helper functions for conversation metadata
+function generateSummary(content: string, anchors: SemanticAnchor[]): string {
+  // Simple summary: first 100 chars + stats
+  const preview = content.substring(0, 100);
+  return `${preview}${content.length > 100 ? '...' : ''} (${anchors.length} anchors)`;
+}
+
+function extractTags(
+  choffDocument: { contexts: Array<{ value: string }> },
+  anchors: SemanticAnchor[],
+): string[] {
+  const tags = [];
+
+  // Add context tags
+  for (const context of choffDocument.contexts) {
+    tags.push(`context:${context.value}`);
+  }
+
+  // Add anchor type tags
+  const anchorTypes = new Set(anchors.map((a) => a.type));
+  for (const type of anchorTypes) {
+    tags.push(`anchor:${type}`);
+  }
+
+  return tags;
+}
+
 // Tool implementations
 export function createSaveCheckpointTool(): MCPTool<
   z.infer<typeof saveCheckpointSchema>
@@ -76,7 +171,7 @@ export function createSaveCheckpointTool(): MCPTool<
       },
       required: ['content'],
     },
-    handler: (args): ToolResult<unknown> => {
+    handler: async (args): Promise<ToolResult<unknown>> => {
       try {
         // Validate input
         const input = args || { content: '' };
@@ -91,16 +186,53 @@ export function createSaveCheckpointTool(): MCPTool<
 
         // Extract basic statistics
         const tokensProcessed = validated.content.split(/\s+/).length;
-        const anchorsExtracted = validated.extractAnchors
-          ? choffDocument.statistics.totalMarkers
-          : undefined;
+
+        // Extract semantic anchors if requested
+        let anchors: SemanticAnchor[] = [];
+        if (validated.extractAnchors !== false) {
+          const detector = new SemanticAnchorDetector();
+          anchors = detector.extract(validated.content);
+        }
+
+        // Generate summary and tags
+        const summary = generateSummary(validated.content, anchors);
+        const tags = extractTags(choffDocument, anchors);
+
+        // Save to storage
+        const storage = getStorage();
+        const saveResult = await storage.save({
+          content: validated.content,
+          choffDocument,
+          summary,
+          tags,
+          metadata: {
+            tokensProcessed,
+            anchorsExtracted: anchors.length,
+            checkpointId,
+            anchors,
+          },
+        });
+
+        if (!saveResult.success) {
+          return {
+            success: false,
+            error: {
+              code: 'STORAGE_SAVE_ERROR',
+              message: `Failed to save conversation: ${saveResult.error?.message || 'Unknown error'}`,
+              retryable: true,
+            },
+          };
+        }
+
+        const conversationId = saveResult.data;
 
         return {
           success: true,
           data: {
             checkpointId,
+            conversationId,
             tokensProcessed,
-            anchorsExtracted,
+            anchorsExtracted: anchors.length,
             choffMetadata: {
               totalMarkers: choffDocument.statistics.totalMarkers,
               markerDensity: choffDocument.statistics.markerDensity,
@@ -171,18 +303,107 @@ export function createLoadContextTool(): MCPTool<
         },
       },
     },
-    handler: (args): ToolResult<unknown> => {
-      const validated = loadContextSchema.parse(args);
+    handler: async (args): Promise<ToolResult<unknown>> => {
+      try {
+        const validated = loadContextSchema.parse(args);
+        const storage = getStorage();
 
-      // For now, return empty context
-      return {
-        success: true,
-        data: {
-          contexts: [],
-          totalTokens: 0,
-          query: validated.query,
-        },
-      };
+        // Build search criteria
+        const searchCriteria: SearchCriteria = {};
+
+        if (validated.query) {
+          searchCriteria.query = validated.query;
+        }
+
+        if (validated.timeRange) {
+          searchCriteria.timeRange = {
+            start: new Date(validated.timeRange.start),
+            end: new Date(validated.timeRange.end),
+          };
+        }
+
+        const searchResult = await storage.search(searchCriteria);
+
+        if (!searchResult.success) {
+          return {
+            success: false,
+            error: {
+              code: 'STORAGE_SEARCH_ERROR',
+              message: `Storage search failed: ${searchResult.error?.message || 'Unknown error'}`,
+              retryable: true,
+            },
+          };
+        }
+
+        const conversations = searchResult.data || [];
+
+        // Process conversations for return
+        let contexts = [];
+        let totalTokens = 0;
+        const maxTokens = validated.maxTokens || 4000;
+
+        for (const conv of conversations) {
+          const tokens = conv.content.split(/\s+/).length;
+
+          if (totalTokens + tokens > maxTokens) {
+            // Truncate if needed
+            const remainingTokens = maxTokens - totalTokens;
+            if (remainingTokens > 0) {
+              const words = conv.content.split(/\s+/).slice(0, remainingTokens);
+              contexts.push({
+                conversationId: conv.id,
+                content: validated.anchorsOnly ? '' : words.join(' ') + '...',
+                summary: conv.summary,
+                tags: conv.tags,
+                metadata: conv.metadata || {},
+                timestamp: conv.timestamp,
+              });
+              totalTokens = maxTokens;
+            }
+            break;
+          }
+
+          contexts.push({
+            conversationId: conv.id,
+            content: validated.anchorsOnly ? '' : conv.content,
+            summary: conv.summary,
+            tags: conv.tags,
+            metadata: conv.metadata || {},
+            timestamp: conv.timestamp,
+          });
+          totalTokens += tokens;
+        }
+
+        // If anchorsOnly, filter to just return anchor information
+        if (validated.anchorsOnly) {
+          contexts = contexts.map((ctx) => ({
+            ...ctx,
+            content: undefined, // No content in anchors-only mode
+            anchors: ctx.metadata.anchors || [],
+            metadata: {
+              anchors: ctx.metadata.anchors || [],
+            },
+          }));
+        }
+
+        return {
+          success: true,
+          data: {
+            contexts,
+            totalTokens,
+            query: validated.query,
+          } as LoadContextResponse,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: {
+            code: 'LOAD_CONTEXT_ERROR',
+            message: `Failed to load context: ${error instanceof Error ? error.message : String(error)}`,
+            retryable: true,
+          },
+        };
+      }
     },
   };
 }
@@ -216,106 +437,75 @@ export function createGetAnchorsTool(): MCPTool<
         },
       },
     },
-    handler: (args): ToolResult<unknown> => {
+    handler: async (args): Promise<ToolResult<unknown>> => {
       try {
         const validated = getAnchorsSchema.parse(args);
 
+        // If no content provided, extract from storage
         if (!validated.content) {
-          return {
-            success: true,
-            data: {
-              anchors: [],
-              total: 0,
-              filters: validated,
-              message: 'No content provided for anchor extraction',
-            },
-          };
-        }
+          const storage = getStorage();
+          const searchResult = await storage.search({});
 
-        // Parse CHOFF content
-        const parser = new CHOFFParser();
-        const choffDocument = parser.parse(validated.content);
+          if (!searchResult.success) {
+            return {
+              success: false,
+              error: {
+                code: 'STORAGE_SEARCH_ERROR',
+                message: `Storage search failed: ${searchResult.error?.message || 'Unknown error'}`,
+                retryable: true,
+              },
+            };
+          }
 
-        // Extract semantic anchors from CHOFF markers
-        const anchors = [];
+          const conversations = searchResult.data || [];
 
-        // Map state markers to semantic anchors
-        for (const state of choffDocument.states) {
-          let anchorType: string | null = null;
-          const confidence = 0.8; // Base confidence for state-based anchors
-
-          if (state.type === 'simple') {
-            const value = state.value.toLowerCase();
-            if (value.includes('decisive') || value.includes('decided')) {
-              anchorType = 'decision';
-            } else if (value.includes('blocked') || value.includes('stuck')) {
-              anchorType = 'blocker';
-            } else if (
-              value.includes('eureka') ||
-              value.includes('breakthrough')
-            ) {
-              anchorType = 'breakthrough';
-            } else if (
-              value.includes('questioning') ||
-              value.includes('curious')
-            ) {
-              anchorType = 'question';
+          let allAnchors: SemanticAnchor[] = [];
+          for (const conv of conversations) {
+            if (conv.metadata?.anchors) {
+              allAnchors.push(...conv.metadata.anchors);
             }
           }
 
-          if (
-            anchorType &&
-            (!validated.type || validated.type === anchorType)
-          ) {
-            anchors.push({
-              id: `anchor_${anchors.length + 1}`,
-              type: anchorType,
-              confidence,
-              position: state.position,
-              content: state.raw,
-              context: 'state_marker',
-              resolved: false, // Default to unresolved
-            });
+          // Filter by type if specified
+          if (validated.type) {
+            allAnchors = allAnchors.filter((a) => a.type === validated.type);
           }
+
+          // Filter by resolved status if specified
+          if (validated.resolved !== undefined) {
+            allAnchors = allAnchors.filter(
+              (a) => a.resolved === validated.resolved,
+            );
+          }
+
+          // Apply limit
+          const limitedAnchors = validated.limit
+            ? allAnchors.slice(0, validated.limit)
+            : allAnchors;
+
+          return {
+            success: true,
+            data: {
+              anchors: limitedAnchors,
+              total: allAnchors.length,
+              filters: validated,
+              source: 'stored_conversations',
+            } as GetAnchorsResponse,
+          };
         }
 
-        // Map pattern markers to semantic anchors
-        for (const pattern of choffDocument.patterns) {
-          let anchorType: string | null = null;
-          const confidence = 0.7; // Slightly lower confidence for pattern-based anchors
+        // Use semantic anchor detector for content
+        const detector = new SemanticAnchorDetector();
+        let anchors = detector.extract(validated.content);
 
-          const category = pattern.category.toLowerCase();
-          if (category.includes('decision') || category.includes('choice')) {
-            anchorType = 'decision';
-          } else if (category.includes('block') || category.includes('stuck')) {
-            anchorType = 'blocker';
-          } else if (
-            category.includes('breakthrough') ||
-            category.includes('solution')
-          ) {
-            anchorType = 'breakthrough';
-          } else if (
-            category.includes('question') ||
-            category.includes('inquiry')
-          ) {
-            anchorType = 'question';
-          }
+        // Filter by type if specified
+        if (validated.type) {
+          anchors = anchors.filter((a) => a.type === validated.type);
+        }
 
-          if (
-            anchorType &&
-            (!validated.type || validated.type === anchorType)
-          ) {
-            anchors.push({
-              id: `anchor_${anchors.length + 1}`,
-              type: anchorType,
-              confidence,
-              position: pattern.position,
-              content: pattern.raw,
-              context: 'pattern_marker',
-              resolved:
-                pattern.flow === 'completed' || pattern.flow === 'resolved',
-            });
-          }
+        // Filter by resolved status if specified
+        if (validated.resolved !== undefined) {
+          anchors = anchors.filter((a) => a.resolved === validated.resolved);
         }
 
         // Apply limit
@@ -329,12 +519,8 @@ export function createGetAnchorsTool(): MCPTool<
             anchors: limitedAnchors,
             total: anchors.length,
             filters: validated,
-            choffStats: {
-              totalMarkers: choffDocument.statistics.totalMarkers,
-              parseTime: choffDocument.parseTime,
-              errors: choffDocument.errors.length,
-            },
-          },
+            source: 'content',
+          } as GetAnchorsResponse,
         };
       } catch (error) {
         return {
@@ -343,6 +529,142 @@ export function createGetAnchorsTool(): MCPTool<
             code: 'ANCHOR_EXTRACTION_ERROR',
             message: `Failed to extract anchors: ${error instanceof Error ? error.message : String(error)}`,
             retryable: false,
+          },
+        };
+      }
+    },
+  };
+}
+
+export function createClearMemoryTool(): MCPTool<
+  z.infer<typeof clearMemorySchema>
+> {
+  return {
+    name: 'clearMemory',
+    description: 'Clear conversation memory with confirmation',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        confirm: {
+          type: 'boolean',
+          description: 'Must be true to confirm deletion',
+        },
+        beforeDate: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Optional: Only clear conversations before this date',
+        },
+      },
+      required: ['confirm'],
+    },
+    handler: async (args): Promise<ToolResult<unknown>> => {
+      try {
+        const validated = clearMemorySchema.parse(args);
+
+        if (!validated.confirm) {
+          return {
+            success: false,
+            error: {
+              code: 'CONFIRMATION_REQUIRED',
+              message:
+                'Confirmation required to clear memory. Set confirm: true',
+              retryable: true,
+            },
+          };
+        }
+
+        const storage = getStorage();
+
+        if (validated.beforeDate) {
+          // Clear conversations before specified date
+          const searchResult = await storage.search({
+            timeRange: {
+              start: new Date(0), // Beginning of time
+              end: new Date(validated.beforeDate),
+            },
+          });
+
+          if (!searchResult.success) {
+            return {
+              success: false,
+              error: {
+                code: 'STORAGE_SEARCH_ERROR',
+                message: `Storage search failed: ${searchResult.error?.message || 'Unknown error'}`,
+                retryable: true,
+              },
+            };
+          }
+
+          const conversations = searchResult.data || [];
+
+          let deletedCount = 0;
+          for (const conv of conversations) {
+            const deleteResult = await storage.delete(conv.id);
+            if (deleteResult.success) {
+              deletedCount++;
+            }
+          }
+
+          return {
+            success: true,
+            data: {
+              deletedCount,
+              message: `Cleared ${deletedCount} conversations before ${validated.beforeDate}`,
+            },
+          };
+        } else {
+          // Clear all conversations
+          const statsResult = await storage.getStats();
+          if (!statsResult.success) {
+            return {
+              success: false,
+              error: {
+                code: 'STORAGE_STATS_ERROR',
+                message: `Failed to get storage stats: ${statsResult.error?.message || 'Unknown error'}`,
+                retryable: true,
+              },
+            };
+          }
+
+          // const totalBefore = statsResult.data?.totalEntries || 0;
+
+          // Get all conversations and delete them
+          const searchResult = await storage.search({});
+          if (!searchResult.success) {
+            return {
+              success: false,
+              error: {
+                code: 'STORAGE_SEARCH_ERROR',
+                message: `Storage search failed: ${searchResult.error?.message || 'Unknown error'}`,
+                retryable: true,
+              },
+            };
+          }
+
+          const conversations = searchResult.data || [];
+          let deletedCount = 0;
+          for (const conv of conversations) {
+            const deleteResult = await storage.delete(conv.id);
+            if (deleteResult.success) {
+              deletedCount++;
+            }
+          }
+
+          return {
+            success: true,
+            data: {
+              deletedCount,
+              message: `Cleared all ${deletedCount} conversations`,
+            },
+          };
+        }
+      } catch (error) {
+        return {
+          success: false,
+          error: {
+            code: 'CLEAR_MEMORY_ERROR',
+            message: `Failed to clear memory: ${error instanceof Error ? error.message : String(error)}`,
+            retryable: true,
           },
         };
       }

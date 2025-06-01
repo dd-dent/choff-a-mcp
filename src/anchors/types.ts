@@ -16,6 +16,7 @@ export interface SemanticAnchor {
   answersQuestion?: string; // ID of question this answers
   relatedTo?: string[]; // IDs of related anchors
   choffContext?: string; // CHOFF state/context if present
+  resolved?: boolean; // Whether this anchor has been resolved
 
   // Extraction metadata
   extractedAt: Date;

@@ -1,4 +1,5 @@
 import { CHOFFDocument } from '../parser/types.js';
+import type { SemanticAnchor } from '../anchors/types.js';
 
 // Core conversation entry stored in JSON
 export interface ConversationEntry {
@@ -12,6 +13,7 @@ export interface ConversationEntry {
     checkpointId?: string;
     projectId?: string; // For future multi-tenancy
     userId?: string; // For future multi-tenancy
+    anchors?: SemanticAnchor[];
   };
   summary?: string;
   tags?: string[];

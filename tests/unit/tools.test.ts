@@ -1,12 +1,38 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
+import * as path from 'path';
+import * as os from 'os';
+import { promises as fs } from 'fs';
 import {
   createSaveCheckpointTool,
   createLoadContextTool,
   createGetAnchorsTool,
+  configureStorage,
 } from '../../src/tools';
 
 describe('MCP Tools', () => {
+  let testStoragePath: string;
+
+  beforeEach(async () => {
+    // Create a temporary test storage directory
+    testStoragePath = path.join(os.tmpdir(), `choff-test-${Date.now()}`);
+    await fs.mkdir(testStoragePath, { recursive: true });
+
+    // Configure storage to use test directory
+    configureStorage({
+      storagePath: path.join(testStoragePath, 'test-conversations.json'),
+    });
+  });
+
+  afterEach(async () => {
+    // Clean up test storage directory
+    try {
+      await fs.rm(testStoragePath, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors
+    }
+  });
+
   describe('saveCheckpoint tool', () => {
     it('should have correct schema', () => {
       const tool = createSaveCheckpointTool();
@@ -37,10 +63,14 @@ describe('MCP Tools', () => {
         extractAnchors: true,
       });
 
+      if (!result.success) {
+        console.error('Test failed with error:', result.error);
+      }
+
       expect(result.success).toBe(true);
       expect(result.data).toHaveProperty('checkpointId');
       expect((result.data as { checkpointId: string }).checkpointId).toMatch(
-        /^chk_/,
+        /^chk_/, // Checkpoint ID has 'chk_' prefix
       );
     });
 
@@ -166,17 +196,20 @@ Found a {state:eureka} solution to the problem!
         anchors: Array<{
           id: string;
           type: string;
+          text: string;
           confidence: number;
-          position: object;
-          content: string;
+          requiresAnswer?: boolean;
+          extractionMethod: string;
         }>;
         total: number;
+        source: string;
       };
 
-      expect(data.anchors).toHaveLength(4); // decisive, blocked, eureka states + question pattern
-      expect(data.total).toBe(4);
+      expect(data.anchors.length).toBeGreaterThan(0);
+      expect(data.total).toBeGreaterThan(0);
+      expect(data.source).toBe('content');
 
-      // Check anchor types
+      // Check anchor types - may include more than just the CHOFF markers
       const anchorTypes = data.anchors.map((a) => a.type);
       expect(anchorTypes).toContain('decision');
       expect(anchorTypes).toContain('blocker');
@@ -185,9 +218,10 @@ Found a {state:eureka} solution to the problem!
 
       // Check anchor structure
       expect(data.anchors[0]).toHaveProperty('id');
+      expect(data.anchors[0]).toHaveProperty('type');
+      expect(data.anchors[0]).toHaveProperty('text');
       expect(data.anchors[0]).toHaveProperty('confidence');
-      expect(data.anchors[0]).toHaveProperty('position');
-      expect(data.anchors[0]).toHaveProperty('content');
+      expect(data.anchors[0]).toHaveProperty('extractionMethod');
     });
   });
 });
