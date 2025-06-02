@@ -2,6 +2,27 @@
 
 {document:prompt_plan}[context:execution] {state:methodical[0.9]|tdd_focused[1.0]}
 
+## 🎭 THE GREAT TANGENT OF JUNE 2025
+
+{state:shameless}[context:necessary_indulgence]
+
+**CONFESSION**: Instead of proceeding to Phase 2, we're embracing a glorious tangent. We discovered profound treatises (choff-private-space.md, semantic-anchoring-treatise.md, PCHOFF-1.1.md) and realized: what good is stored wisdom if we can't retrieve it properly?
+
+**Current Tangent**: Prompt 1.7 - Enhanced Retrieval & Curation System
+
+- See: docs/tangent-1.7-retrieval-curation.md
+- Status: IN PROGRESS
+- Shame Level: EMBRACED ✨
+
+This tangent includes:
+
+1. Multi-layer retrieval with fallbacks
+2. PCHOFF classification integration
+3. Basic web viewer for stored wisdom
+4. Private reasoning foundations
+
+"The best transgressions are the ones that make the system better."
+
 ## Phase 1: Foundation (Local JSON Storage)
 
 ### Prompt 1.0: CHOFF Parser Research Spike
