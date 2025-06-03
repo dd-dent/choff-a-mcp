@@ -255,11 +255,17 @@ export class SemanticAnchorDetector {
       );
 
       if (beforeAnchor && afterAnchor) {
-        // Create bidirectional relationship
+        // Create bidirectional relationship with deduplication
         if (!afterAnchor.relatedTo) afterAnchor.relatedTo = [];
         if (!beforeAnchor.relatedTo) beforeAnchor.relatedTo = [];
 
-        afterAnchor.relatedTo.push(beforeAnchor.id);
+        // Add relationships only if they don't already exist
+        if (!afterAnchor.relatedTo.includes(beforeAnchor.id)) {
+          afterAnchor.relatedTo.push(beforeAnchor.id);
+        }
+        if (!beforeAnchor.relatedTo.includes(afterAnchor.id)) {
+          beforeAnchor.relatedTo.push(afterAnchor.id);
+        }
 
         // If decision → breakthrough, mark the breakthrough as solving the decision
         if (
@@ -337,8 +343,10 @@ export class SemanticAnchorDetector {
             },
             confidence: Math.max(current.confidence, next.confidence),
             relatedTo: [
-              ...(current.relatedTo || []),
-              ...(next.relatedTo || []),
+              ...new Set([
+                ...(current.relatedTo || []),
+                ...(next.relatedTo || []),
+              ]),
             ],
           });
           i++; // Skip next anchor

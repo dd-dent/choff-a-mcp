@@ -60,11 +60,16 @@ mcp__choff -
 
 The new loadContext is INTELLIGENT. It has layers like an onion:
 
-### Basic Search
+### Multi-Layer Search (Content → PCHOFF → Anchor → State → Context)
 
 ```typescript
 loadContext({ query: 'typescript parser' });
-// Searches content first, then falls back to anchors, states, contexts
+// Layer 1: Content search
+// Layer 2: PCHOFF classification search
+// Layer 3: Semantic anchor search
+// Layer 4: CHOFF state matching
+// Layer 5: Context matching
+// Each layer only activates if previous ones return empty!
 ```
 
 ### Filter by Cognitive State
@@ -76,12 +81,19 @@ loadContext({
 });
 ```
 
-### Filter by Context
+### Filter by CHOFF Context or PCHOFF Classification
 
 ```typescript
 loadContext({
   contextFilter: ['technical', 'architecture'], // OR logic
   anchorTypeFilter: 'decision', // What decisions in these contexts?
+});
+
+// Or filter by PCHOFF classification:
+loadContext({
+  pchoffTypeFilter: ['observation', 'analysis'],
+  pchoffInsightFilter: 'collective',
+  pchoffPatternFilter: 'stable',
 });
 ```
 
@@ -105,10 +117,12 @@ loadContext({
 When you search, you get:
 
 - **contexts**: The actual conversations found
-- **searchStrategy**: How it found them (content/anchor/state/context)
+- **searchStrategy**: How it found them (content/pchoff_search/anchor/state/context)
 - **toolSuggestions**: "Hey, you might want to run getAnchors next!"
 - **relatedSearches**: Keywords extracted from results
 - **availableFilters**: What filters you could use (when empty)
+- **searchMetrics**: Which strategies were tried and search stats
+- **fallbackStrategy**: What backup method found results (if any)
 
 ## 🎨 CHOFF Notation Cheatsheet
 

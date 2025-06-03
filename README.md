@@ -1,6 +1,6 @@
 # CHOFF-A-MCP (Anamnesis)
 
-[![Tests](https://img.shields.io/badge/tests-78%20passing-brightgreen)](./tests/)
+[![Tests](https://img.shields.io/badge/tests-130%20passing-brightgreen)](./tests/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
 [![MCP](https://img.shields.io/badge/MCP-1.12-purple)](https://modelcontextprotocol.io/)
 
@@ -13,7 +13,8 @@
 ## 🎯 What It Does
 
 - **Persistent Memory**: Remember important decisions, breakthroughs, and context across chat sessions
-- **CHOFF Parsing**: Advanced parsing of cognitive state markers and semantic anchors
+- **Enhanced Retrieval**: Multi-layer search with content → PCHOFF → anchor → state → context fallbacks
+- **CHOFF + PCHOFF Integration**: Advanced parsing with classification-aware memory retrieval
 - **Semantic Anchors**: Automatically detect and categorize decisions, blockers, breakthroughs, and questions
 - **Smart Storage**: JSON-based conversation persistence with atomic operations
 - **MCP Integration**: Seamless integration with Claude Code and other MCP-compatible tools
@@ -45,10 +46,9 @@ Add to your MCP configuration (e.g., for Claude Code):
 
 Once configured, your AI assistant gains access to these tools:
 
-- `store_conversation` - Save important conversation segments
-- `search_conversations` - Find relevant past discussions
-- `list_conversations` - Browse conversation history
-- `get_conversation` - Retrieve specific conversation details
+- `mcp__choff-a-mcp__saveCheckpoint` - Save important conversation segments with CHOFF parsing
+- `mcp__choff-a-mcp__loadContext` - Enhanced multi-layer search with rich filtering
+- `mcp__choff-a-mcp__getAnchors` - Retrieve semantic anchors with classification support
 
 ## 📖 CHOFF Notation
 
@@ -74,13 +74,19 @@ See [docs/choff-2-5.md](./docs/choff-2-5.md) for the complete specification.
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   CHOFF Parser  │───▶│  Semantic Anchors │───▶│  JSON Storage   │
+│   CHOFF Parser  │───▶│  PCHOFF Classifier│───▶│ Enhanced Storage│
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                        │                       │
+         ▼                        ▼                       ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│ Semantic Anchors│    │ Multi-Layer Search│    │  Relationship   │
+│   Extraction    │───▶│   & Retrieval     │───▶│   Resolution    │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
          │                        │                       │
          ▼                        ▼                       ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                     MCP Tools Layer                             │
-│  store_conversation │ search_conversations │ get_conversation   │
+│ saveCheckpoint │ loadContext (enhanced) │ getAnchors           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -93,7 +99,7 @@ See [docs/choff-2-5.md](./docs/choff-2-5.md) for the complete specification.
 
 ## 🧪 Development
 
-Built with TDD principles - all 78 tests passing!
+Built with TDD principles - all 130 tests passing!
 
 ```bash
 # Install dependencies
@@ -166,7 +172,10 @@ Environment variables:
 - JSON storage layer ✅
 - Semantic anchor detection ✅
 - MCP tool integration ✅
-- Comprehensive test coverage (78 tests) ✅
+- Comprehensive test coverage (130 tests) ✅
+- Enhanced multi-layer retrieval system ✅
+- PCHOFF-1.1-A classification integration ✅
+- Relationship extraction with deduplication ✅
 
 **Phase 2 - Coming Soon:**
 
