@@ -146,6 +146,18 @@ export class JSONConversationStorage implements ConversationStorage {
         });
       }
 
+      if (criteria.anchorTypes && criteria.anchorTypes.length > 0) {
+        results = results.filter((entry) => {
+          if (!entry.metadata?.anchors || entry.metadata.anchors.length === 0) {
+            return false;
+          }
+          const entryAnchorTypes = entry.metadata.anchors.map((a) => a.type);
+          return criteria.anchorTypes!.some((type) =>
+            entryAnchorTypes.includes(type),
+          );
+        });
+      }
+
       // Sort by timestamp (newest first)
       results.sort(
         (a, b) =>

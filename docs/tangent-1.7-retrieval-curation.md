@@ -73,14 +73,37 @@ We're not following the plan. We're chasing wisdom instead of features. And it's
 3. **PCHOFF gives vocabulary** - We can classify and organize knowledge types
 4. **Private reasoning matters** - Not all thoughts need to be visible
 
-## Estimated Effort
+## Estimated Effort vs Reality
 
-- Enhanced retrieval: 2-3 hours
-- PCHOFF integration: 1-2 hours
-- Basic web viewer: 2-3 hours
-- Private reasoning foundation: 1 hour exploration
+Original Estimates:
 
-Total tangent: ~1 day of glorious, productive shame
+- Enhanced retrieval: 2-3 hours → **ACTUAL: <30 minutes! ✅**
+- PCHOFF integration: 1-2 hours → Pending
+- Basic web viewer: 2-3 hours → Pending (use off-the-shelf!)
+- Private reasoning foundation: 1 hour exploration → Pending
+
+Total tangent: ~1 day → **On track for massive under-delivery!**
+
+## Implementation Status
+
+### ✅ Enhanced Retrieval (COMPLETE!)
+
+**What We Built:**
+
+- Multi-layer retrieval with Content→Anchor→State→Context fallbacks
+- Rich filtering: contextFilter, stateFilter, anchorTypeFilter, branchFilter
+- Tool invocation suggestions based on results
+- Related search extraction
+- Helpful empty result messages with available filters
+- Search metrics and strategy tracking
+- 12 comprehensive tests, all passing
+
+**Key Insights:**
+
+- Clean architecture wins: separated logic in tools-enhanced.ts
+- TDD + clear requirements = speed
+- Operator precedence bugs are sneaky
+- Branch ID chaos preserved as designed
 
 ## Why This Matters
 

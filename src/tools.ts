@@ -2,25 +2,11 @@ import { z } from 'zod';
 import { CHOFFParser } from './parser/index.js';
 import { JSONConversationStorage } from './storage/json-storage.js';
 import { SemanticAnchorDetector } from './anchors/semantic-anchor-detector.js';
-import type { ConversationStorage, SearchCriteria } from './storage/types.js';
+import { EnhancedRetrieval } from './tools-enhanced.js';
+import type { ConversationStorage } from './storage/types.js';
 import type { SemanticAnchor } from './anchors/types.js';
 
 // Tool response interfaces
-interface LoadContextResponse {
-  contexts: Array<{
-    conversationId: string;
-    content?: string;
-    summary?: string;
-    tags?: string[];
-    anchors?: SemanticAnchor[];
-    metadata: {
-      anchors?: SemanticAnchor[];
-    };
-    timestamp: Date;
-  }>;
-  totalTokens: number;
-  query?: string;
-}
 
 interface GetAnchorsResponse {
   anchors: SemanticAnchor[];
@@ -68,6 +54,13 @@ const loadContextSchema = z.object({
     .optional(),
   anchorsOnly: z.boolean().optional(),
   maxTokens: z.number().optional(),
+  // Enhanced options
+  contextFilter: z.union([z.string(), z.array(z.string())]).optional(),
+  anchorTypeFilter: z
+    .enum(['decision', 'blocker', 'breakthrough', 'question'])
+    .optional(),
+  stateFilter: z.union([z.string(), z.array(z.string())]).optional(),
+  branchFilter: z.string().optional(),
 });
 
 const getAnchorsSchema = z.object({
@@ -301,6 +294,23 @@ export function createLoadContextTool(): MCPTool<
           description: 'Maximum tokens to return',
           default: 4000,
         },
+        contextFilter: {
+          type: ['string', 'array'],
+          description: 'Filter by CHOFF context(s)',
+        },
+        anchorTypeFilter: {
+          type: 'string',
+          enum: ['decision', 'blocker', 'breakthrough', 'question'],
+          description: 'Filter by anchor type',
+        },
+        stateFilter: {
+          type: ['string', 'array'],
+          description: 'Filter by CHOFF state(s)',
+        },
+        branchFilter: {
+          type: 'string',
+          description: 'Filter by branch ID (local to conversation)',
+        },
       },
     },
     handler: async (args): Promise<ToolResult<unknown>> => {
@@ -308,91 +318,13 @@ export function createLoadContextTool(): MCPTool<
         const validated = loadContextSchema.parse(args);
         const storage = getStorage();
 
-        // Build search criteria
-        const searchCriteria: SearchCriteria = {};
-
-        if (validated.query) {
-          searchCriteria.query = validated.query;
-        }
-
-        if (validated.timeRange) {
-          searchCriteria.timeRange = {
-            start: new Date(validated.timeRange.start),
-            end: new Date(validated.timeRange.end),
-          };
-        }
-
-        const searchResult = await storage.search(searchCriteria);
-
-        if (!searchResult.success) {
-          return {
-            success: false,
-            error: {
-              code: 'STORAGE_SEARCH_ERROR',
-              message: `Storage search failed: ${searchResult.error?.message || 'Unknown error'}`,
-              retryable: true,
-            },
-          };
-        }
-
-        const conversations = searchResult.data || [];
-
-        // Process conversations for return
-        let contexts = [];
-        let totalTokens = 0;
-        const maxTokens = validated.maxTokens || 4000;
-
-        for (const conv of conversations) {
-          const tokens = conv.content.split(/\s+/).length;
-
-          if (totalTokens + tokens > maxTokens) {
-            // Truncate if needed
-            const remainingTokens = maxTokens - totalTokens;
-            if (remainingTokens > 0) {
-              const words = conv.content.split(/\s+/).slice(0, remainingTokens);
-              contexts.push({
-                conversationId: conv.id,
-                content: validated.anchorsOnly ? '' : words.join(' ') + '...',
-                summary: conv.summary,
-                tags: conv.tags,
-                metadata: conv.metadata || {},
-                timestamp: conv.timestamp,
-              });
-              totalTokens = maxTokens;
-            }
-            break;
-          }
-
-          contexts.push({
-            conversationId: conv.id,
-            content: validated.anchorsOnly ? '' : conv.content,
-            summary: conv.summary,
-            tags: conv.tags,
-            metadata: conv.metadata || {},
-            timestamp: conv.timestamp,
-          });
-          totalTokens += tokens;
-        }
-
-        // If anchorsOnly, filter to just return anchor information
-        if (validated.anchorsOnly) {
-          contexts = contexts.map((ctx) => ({
-            ...ctx,
-            content: undefined, // No content in anchors-only mode
-            anchors: ctx.metadata.anchors || [],
-            metadata: {
-              anchors: ctx.metadata.anchors || [],
-            },
-          }));
-        }
+        // Use enhanced retrieval
+        const enhancedRetrieval = new EnhancedRetrieval(storage);
+        const result = await enhancedRetrieval.searchWithFallbacks(validated);
 
         return {
           success: true,
-          data: {
-            contexts,
-            totalTokens,
-            query: validated.query,
-          } as LoadContextResponse,
+          data: result,
         };
       } catch (error) {
         return {
