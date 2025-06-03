@@ -447,5 +447,57 @@ program
     }
   });
 
+// Serve command - HTTP API server
+program
+  .command('serve')
+  .description('Start HTTP API server for web access')
+  .option('-p, --port <port>', 'Port to listen on', '3000')
+  .option(
+    '-s, --storage-path <path>',
+    'Storage directory path',
+    DEFAULT_STORAGE_PATH,
+  )
+  .action(async (options: { port: string; storagePath: string }) => {
+    try {
+      const port = parseInt(options.port, 10);
+      if (isNaN(port) || port < 0 || port > 65535) {
+        console.error('❌ Invalid port number');
+        process.exit(1);
+      }
+
+      // Configure storage if custom path provided
+      if (options.storagePath !== DEFAULT_STORAGE_PATH) {
+        const { configureStorage } = await import('./tools.js');
+        configureStorage({ storageDir: options.storagePath });
+      }
+
+      // Import and start HTTP server
+      const { ChoffHttpServer } = await import('./http-api.js');
+      const server = new ChoffHttpServer(port);
+
+      await server.start();
+      console.log(
+        `🚀 CHOFF HTTP API server running on http://localhost:${port}`,
+      );
+      console.log(`📁 Storage path: ${options.storagePath}`);
+      console.log('\nEndpoints:');
+      console.log(`  GET /health - Health check`);
+      console.log(`  GET /api/query - Search memory`);
+      console.log('\nPress Ctrl+C to stop\n');
+
+      // Keep the process running
+      process.on('SIGINT', () => {
+        console.log('\n\n👋 Shutting down server...');
+        void server.stop().then(() => process.exit(0));
+      });
+    } catch (error) {
+      console.error(
+        '❌ Failed to start server:',
+        error instanceof Error ? error.message : error,
+      );
+      process.exit(1);
+    }
+  });
+
 // Parse and execute
 program.parse();
