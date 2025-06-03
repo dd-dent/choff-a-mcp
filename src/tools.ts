@@ -54,13 +54,19 @@ const loadContextSchema = z.object({
     .optional(),
   anchorsOnly: z.boolean().optional(),
   maxTokens: z.number().optional(),
-  // Enhanced options
+  // Enhanced CHOFF options
   contextFilter: z.union([z.string(), z.array(z.string())]).optional(),
   anchorTypeFilter: z
     .enum(['decision', 'blocker', 'breakthrough', 'question'])
     .optional(),
   stateFilter: z.union([z.string(), z.array(z.string())]).optional(),
   branchFilter: z.string().optional(),
+  // PCHOFF-1.1-A options
+  pchoffType: z.union([z.string(), z.array(z.string())]).optional(),
+  pchoffInsight: z.union([z.string(), z.array(z.string())]).optional(),
+  pchoffLevel: z.union([z.string(), z.array(z.string())]).optional(),
+  pchoffPattern: z.union([z.string(), z.array(z.string())]).optional(),
+  pchoffSource: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
 const getAnchorsSchema = z.object({

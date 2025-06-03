@@ -5,6 +5,10 @@ import type {
   ConversationEntry,
 } from './storage/types.js';
 import type { SemanticAnchor } from './anchors/types.js';
+import {
+  extractAllPCHOFFMarkers,
+  extractPCHOFFMetadata,
+} from './parser/pchoff-parser.js';
 
 // Enhanced input schema with new filtering options
 export const enhancedLoadContextSchema = z.object({
@@ -17,16 +21,22 @@ export const enhancedLoadContextSchema = z.object({
     .optional(),
   anchorsOnly: z.boolean().optional(),
   maxTokens: z.number().optional(),
-  // New enhanced options
+  // Enhanced CHOFF options
   contextFilter: z.union([z.string(), z.array(z.string())]).optional(),
   anchorTypeFilter: z
     .enum(['decision', 'blocker', 'breakthrough', 'question'])
     .optional(),
   stateFilter: z.union([z.string(), z.array(z.string())]).optional(),
   branchFilter: z.string().optional(), // For future branch ID filtering
+  // PCHOFF-1.1-A options
+  pchoffType: z.union([z.string(), z.array(z.string())]).optional(),
+  pchoffInsight: z.union([z.string(), z.array(z.string())]).optional(),
+  pchoffLevel: z.union([z.string(), z.array(z.string())]).optional(),
+  pchoffPattern: z.union([z.string(), z.array(z.string())]).optional(),
+  pchoffSource: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
-interface EnhancedLoadContextResponse {
+export interface EnhancedLoadContextResponse {
   contexts: Array<{
     conversationId: string;
     content?: string;
@@ -44,6 +54,7 @@ interface EnhancedLoadContextResponse {
   // Enhanced response fields
   searchStrategy?:
     | 'content_search'
+    | 'pchoff_search'
     | 'anchor_search'
     | 'state_matching'
     | 'fallback_all';
@@ -55,6 +66,11 @@ interface EnhancedLoadContextResponse {
     contexts: string[];
     anchorTypes: string[];
     states: string[];
+    pchoffTypes: string[];
+    pchoffInsights: string[];
+    pchoffLevels: string[];
+    pchoffPatterns: string[];
+    pchoffSources: string[];
   };
   toolSuggestions?: Array<{
     tool: string;
@@ -122,6 +138,23 @@ export class EnhancedRetrieval {
       searchCriteria.anchorTypes = [args.anchorTypeFilter];
     }
 
+    // PCHOFF-1.1-A filtering
+    if (args.pchoffType) {
+      searchCriteria.pchoffType = args.pchoffType;
+    }
+    if (args.pchoffInsight) {
+      searchCriteria.pchoffInsight = args.pchoffInsight;
+    }
+    if (args.pchoffLevel) {
+      searchCriteria.pchoffLevel = args.pchoffLevel;
+    }
+    if (args.pchoffPattern) {
+      searchCriteria.pchoffPattern = args.pchoffPattern;
+    }
+    if (args.pchoffSource) {
+      searchCriteria.pchoffSource = args.pchoffSource;
+    }
+
     // Don't include query in storage search - we'll handle it with multi-layer approach
     // This allows us to apply different search strategies
 
@@ -144,7 +177,17 @@ export class EnhancedRetrieval {
       searchMetrics.strategiesUsed.push('content_search');
       results = this.searchByContent(filteredConversations, args.query);
 
-      // Layer 2: Anchor search fallback
+      // Layer 2: PCHOFF classification search fallback
+      if (results.length === 0) {
+        searchMetrics.strategiesUsed.push('pchoff_search');
+        results = this.searchByPCHOFF(filteredConversations, args.query);
+        if (results.length > 0) {
+          searchStrategy = 'pchoff_search';
+          fallbackStrategy = 'pchoff_search';
+        }
+      }
+
+      // Layer 3: Anchor search fallback
       if (results.length === 0) {
         searchMetrics.strategiesUsed.push('anchor_search');
         results = this.searchByAnchors(filteredConversations, args.query);
@@ -154,7 +197,7 @@ export class EnhancedRetrieval {
         }
       }
 
-      // Layer 3: State matching fallback
+      // Layer 4: State matching fallback
       if (results.length === 0) {
         searchMetrics.strategiesUsed.push('state_matching');
         results = this.searchByStates(filteredConversations, args.query);
@@ -164,7 +207,7 @@ export class EnhancedRetrieval {
         }
       }
 
-      // Layer 4: Context matching fallback
+      // Layer 5: Context matching fallback
       if (results.length === 0) {
         searchMetrics.strategiesUsed.push('context_matching');
         results = this.searchByContexts(filteredConversations, args.query);
@@ -207,7 +250,16 @@ export class EnhancedRetrieval {
         results.length === 0 ? availableFilters.contexts : undefined,
       availableStates:
         results.length === 0 ? availableFilters.states : undefined,
-      availableFilters: results.length === 0 ? availableFilters : undefined,
+      availableFilters:
+        results.length === 0
+          ? availableFilters
+          : args.pchoffType ||
+              args.pchoffInsight ||
+              args.pchoffLevel ||
+              args.pchoffPattern ||
+              args.pchoffSource
+            ? availableFilters
+            : undefined,
       toolSuggestions,
       relatedSearches: results.length > 0 ? relatedSearches : undefined,
       searchMetrics,
@@ -276,6 +328,91 @@ export class EnhancedRetrieval {
     });
   }
 
+  private searchByPCHOFF(
+    conversations: ConversationEntry[],
+    query: string,
+  ): ConversationEntry[] {
+    const queryLower = query.toLowerCase();
+    const queryWords = queryLower
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
+
+    // PCHOFF classification keywords for query matching
+    const pchoffKeywords: Record<string, string[]> = {
+      // Types
+      observation: ['observation', 'observed', 'noticed', 'saw', 'documented'],
+      analysis: ['analysis', 'analyzed', 'examined', 'investigated', 'studied'],
+      theory: ['theory', 'theoretical', 'hypothesis', 'concept', 'framework'],
+      procedure: ['procedure', 'process', 'method', 'steps', 'workflow'],
+      case_study: ['case', 'study', 'example', 'instance', 'scenario'],
+
+      // Insights
+      direct: ['direct', 'immediately', 'obvious', 'clear', 'straightforward'],
+      emergent: ['emergent', 'emerging', 'pattern', 'discovered', 'realized'],
+      collective: ['collective', 'shared', 'collaborative', 'cross-instance'],
+      meta: ['meta', 'recursive', 'self-referential', 'about', 'concerning'],
+      practical: [
+        'practical',
+        'implementation',
+        'applied',
+        'useful',
+        'actionable',
+      ],
+      iterative: ['iterative', 'evolving', 'refined', 'improved', 'developed'],
+
+      // Levels
+      basic: ['basic', 'fundamental', 'foundation', 'simple', 'elementary'],
+      intermediate: ['intermediate', 'advanced', 'complex', 'sophisticated'],
+      experimental: [
+        'experimental',
+        'testing',
+        'trial',
+        'prototype',
+        'exploration',
+      ],
+    };
+
+    return conversations.filter((entry) => {
+      // Ensure PCHOFF metadata exists
+      if (!entry.metadata.pchoff) {
+        entry.metadata.pchoff = extractPCHOFFMetadata(entry.content);
+      }
+
+      const pchoff = entry.metadata.pchoff;
+      if (!pchoff) return false;
+
+      // Check if query words match any PCHOFF classification values
+      const allPchoffValues = [
+        ...(pchoff.types || []),
+        ...(pchoff.insights || []),
+        ...(pchoff.levels || []),
+        ...(pchoff.patterns || []),
+        ...(pchoff.sources || []),
+      ].map((v) => v.toLowerCase());
+
+      // Direct match with PCHOFF values
+      if (
+        queryWords.some((word) =>
+          allPchoffValues.some((value) => value.includes(word)),
+        )
+      ) {
+        return true;
+      }
+
+      // Keyword-based matching
+      for (const [classification, keywords] of Object.entries(pchoffKeywords)) {
+        if (keywords.some((keyword) => queryLower.includes(keyword))) {
+          // Check if this entry has this classification
+          return allPchoffValues.some((value) =>
+            value.includes(classification),
+          );
+        }
+      }
+
+      return false;
+    });
+  }
+
   private searchByStates(
     conversations: ConversationEntry[],
     query: string,
@@ -333,6 +470,11 @@ export class EnhancedRetrieval {
     contexts: string[];
     anchorTypes: string[];
     states: string[];
+    pchoffTypes: string[];
+    pchoffInsights: string[];
+    pchoffLevels: string[];
+    pchoffPatterns: string[];
+    pchoffSources: string[];
   } {
     const contexts = new Set<string>();
     const anchorTypes = new Set<string>();
@@ -353,10 +495,23 @@ export class EnhancedRetrieval {
       }
     }
 
+    // Extract PCHOFF markers from all conversations
+    const pchoffMarkers = extractAllPCHOFFMarkers(
+      conversations.map((conv) => ({
+        content: conv.content,
+        metadata: conv.metadata,
+      })),
+    );
+
     return {
       contexts: Array.from(contexts).sort(),
       anchorTypes: Array.from(anchorTypes).sort(),
       states: Array.from(states).sort(),
+      pchoffTypes: pchoffMarkers.types,
+      pchoffInsights: pchoffMarkers.insights,
+      pchoffLevels: pchoffMarkers.levels,
+      pchoffPatterns: pchoffMarkers.patterns,
+      pchoffSources: pchoffMarkers.sources,
     };
   }
 
@@ -538,6 +693,29 @@ export class EnhancedRetrieval {
 
       // Extract from contexts
       conv.choffDocument.contexts.forEach((ctx) => related.add(ctx.value));
+
+      // Extract from PCHOFF metadata if present
+      if (conv.metadata.pchoff) {
+        const pchoff = conv.metadata.pchoff;
+        pchoff.types?.forEach((type) => related.add(type));
+        pchoff.insights?.forEach((insight) => related.add(insight));
+        pchoff.levels?.forEach((level) => related.add(level));
+      }
+
+      // Extract meaningful words from content if we don't have enough terms yet
+      if (related.size < 3) {
+        const contentWords = conv.content
+          .toLowerCase()
+          .replace(/[^\w\s]/g, ' ')
+          .split(/\s+/)
+          .filter(
+            (w) =>
+              w &&
+              w.length > 5 &&
+              !['making', 'testing', 'running', 'knowledge'].includes(w),
+          );
+        contentWords.slice(0, 2).forEach((word) => related.add(word));
+      }
     }
 
     // Remove the original query terms

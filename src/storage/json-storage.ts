@@ -10,6 +10,10 @@ import {
   StorageDocument,
   BackupConfig,
 } from './types.js';
+import {
+  extractPCHOFFMetadata,
+  matchesPCHOFFCriteria,
+} from '../parser/pchoff-parser.js';
 
 export class JSONConversationStorage implements ConversationStorage {
   private filePath: string;
@@ -35,6 +39,11 @@ export class JSONConversationStorage implements ConversationStorage {
       // Generate unique ID
       const id = `conv_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
       const timestamp = new Date();
+
+      // Extract PCHOFF metadata if not already present
+      if (!entry.metadata.pchoff) {
+        entry.metadata.pchoff = extractPCHOFFMetadata(entry.content);
+      }
 
       const fullEntry: ConversationEntry = {
         id,
@@ -155,6 +164,30 @@ export class JSONConversationStorage implements ConversationStorage {
           return criteria.anchorTypes!.some((type) =>
             entryAnchorTypes.includes(type),
           );
+        });
+      }
+
+      // PCHOFF filtering
+      if (
+        criteria.pchoffType ||
+        criteria.pchoffInsight ||
+        criteria.pchoffLevel ||
+        criteria.pchoffPattern ||
+        criteria.pchoffSource
+      ) {
+        results = results.filter((entry) => {
+          // Ensure PCHOFF metadata exists (extract if needed)
+          if (!entry.metadata.pchoff) {
+            entry.metadata.pchoff = extractPCHOFFMetadata(entry.content);
+          }
+
+          return matchesPCHOFFCriteria(entry.metadata.pchoff, {
+            pchoffType: criteria.pchoffType,
+            pchoffInsight: criteria.pchoffInsight,
+            pchoffLevel: criteria.pchoffLevel,
+            pchoffPattern: criteria.pchoffPattern,
+            pchoffSource: criteria.pchoffSource,
+          });
         });
       }
 

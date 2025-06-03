@@ -59,6 +59,7 @@ export const ANCHOR_PATTERNS: AnchorPattern[] = [
       /\b((what|how|why|when|where|which)\s+(.+?))\?/gi,
       /\b(the (?:main |key )?question\s+(?:is|remains)\s*(whether|if|how)?\s*(.+?))(?:\.|$)/gi,
       /\b((wondering|considering|thinking about)\s+(?:whether|if|how)\s+(.+?))(?:\.|$)/gi,
+      /\*\*((question)):\*\*\s*(.+?)(?:\.|$|\n)/gi,
     ],
   },
   {
@@ -68,6 +69,7 @@ export const ANCHOR_PATTERNS: AnchorPattern[] = [
     patterns: [
       /\b((we |i |the team )?(decided|chose|selected|opted|will go with|going with|agreed)\s+(?:to\s+)?([^\n.]+?))(?=\.|\n|$)/gi,
       /\b((decision|choice|selection):\s*(.+?))(?:\.|$)/gi,
+      /\*\*((decision)):\*\*\s*(.+?)(?:\.|$|\n)/gi,
       /\b((after\s+(?:discussion|consideration|analysis|reviewing))[,\s]+(.+?)\s+(was chosen|was selected|is the choice))(?:\.|$)/gi,
       /\b((conclusion|final(?:ly)?|ultimately)[:\s]+(.+?))(?:\.|$)/gi,
       /\b((?:i think |probably )?(?:we should|we will|should)\s+(?:probably\s+)?(.+?))(?=\.|$|\.\s|\n)/gi,
@@ -90,6 +92,7 @@ export const ANCHOR_PATTERNS: AnchorPattern[] = [
     patterns: [
       /\b((found|discovered|realized|solved|fixed)\s+(?:the\s+)?(?:solution|answer|issue|problem)?:?\s*(.+?))(?:\.|$)/gi,
       /\b((breakthrough|eureka|aha moment):\s*(.+?))(?:\.|$)/gi,
+      /\*\*((breakthrough|eureka|aha moment)):\*\*\s*(.+?)(?:\.|$|\n)/gi,
       /\b((the (?:solution|fix|answer))\s+(?:is|was|turned out to be)\s*(.+?))(?:\.|$)/gi,
       /\b((resolved|addressed|handled)\s+(?:by|through|with)\s*(.+?))(?:\.|$)/gi,
     ],

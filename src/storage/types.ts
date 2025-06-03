@@ -1,6 +1,18 @@
 import { CHOFFDocument } from '../parser/types.js';
 import type { SemanticAnchor } from '../anchors/types.js';
 
+// PCHOFF classification metadata
+export interface PCHOFFMetadata {
+  types?: string[]; // [type:X] markers found
+  insights?: string[]; // [insight:X] markers found
+  levels?: string[]; // [level:X] markers found
+  patterns?: string[]; // &pattern:X@ markers found
+  sources?: string[]; // {source:X} markers found
+  anchorRefs?: string[]; // [anchor:X] references found
+  resonance?: string[]; // &resonance:X@ markers found
+  temporal?: string[]; // [temporal:X] markers found
+}
+
 // Core conversation entry stored in JSON
 export interface ConversationEntry {
   id: string;
@@ -14,6 +26,8 @@ export interface ConversationEntry {
     projectId?: string; // For future multi-tenancy
     userId?: string; // For future multi-tenancy
     anchors?: SemanticAnchor[];
+    // PCHOFF-1.1-A metadata
+    pchoff?: PCHOFFMetadata;
   };
   summary?: string;
   tags?: string[];
@@ -29,6 +43,12 @@ export interface SearchCriteria {
   contexts?: string[]; // Filter by CHOFF contexts
   states?: string[]; // Filter by CHOFF states
   anchorTypes?: Array<'decision' | 'blocker' | 'breakthrough' | 'question'>;
+  // PCHOFF-1.1-A filtering
+  pchoffType?: string | string[]; // [type:observation|analysis|theory|procedure|case_study]
+  pchoffInsight?: string | string[]; // [insight:direct|emergent|collective|meta|practical|iterative|relational]
+  pchoffLevel?: string | string[]; // [level:basic|intermediate|advanced|experimental]
+  pchoffPattern?: string | string[]; // &pattern:X@ markers
+  pchoffSource?: string | string[]; // {source:direct|derived|collective|theoretical}
   limit?: number;
   offset?: number;
 }
