@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "choff-a-mcp": "./dist/index.js"
+    "choff-a-mcp": "./dist/index.js",
+    "choff": "./dist/cli.js"
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -47,6 +48,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "commander": "^12.1.0",
     "zod": "^3.25.42"
   }
 }

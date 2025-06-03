@@ -50,6 +50,24 @@ Once configured, your AI assistant gains access to these tools:
 - `mcp__choff-a-mcp__loadContext` - Enhanced multi-layer search with rich filtering
 - `mcp__choff-a-mcp__getAnchors` - Retrieve semantic anchors with classification support
 
+### CLI Interface
+
+Query your memory directly from the command line:
+
+```bash
+# Search with enhanced multi-layer retrieval
+choff search "quantum velocity" --context technical --anchor breakthrough
+
+# Browse semantic anchors with filtering
+choff anchors --type decision --limit 10
+
+# Export conversations in multiple formats
+choff export --query "PCHOFF integration" --format markdown
+
+# View memory system statistics
+choff stats
+```
+
 ## 📖 CHOFF Notation
 
 CHOFF (Cognitive Hoffman Compression Framework) is a notation system for expressing cognitive states and context:
@@ -95,6 +113,8 @@ See [docs/choff-2-5.md](./docs/choff-2-5.md) for the complete specification.
 - **Parser** (`src/parser/`): Recursive CHOFF notation parser with full v2.5 support
 - **Storage** (`src/storage/`): Atomic JSON-based persistence with backup management
 - **Semantic Anchors** (`src/anchors/`): Intelligent detection of key conversation elements
+- **Enhanced Retrieval** (`src/tools-enhanced.ts`): Multi-layer search with PCHOFF classification
+- **CLI** (`src/cli.ts`): Command-line interface for direct memory queries
 - **MCP Tools** (`src/tools.ts`): Protocol integration and tool implementations
 
 ## 🧪 Development
