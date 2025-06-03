@@ -66,7 +66,49 @@ Before considering a prompt "done":
 - [ ] Types check out (npm run type-check)
 - [ ] Coverage maintained (>90%)
 
-### 6. Reflection & Documentation Phase
+### 6. "Sharing the Love" Pattern (NEW!)
+
+{state:innovative}[context:quality_assurance] &pattern:fresh_eyes|systematic|
+
+For complex specifications, designs, or architectural decisions:
+
+#### The Pattern:
+
+1. **Draft Creation**: Write initial specification/design document
+2. **Save Draft**: Store in docs/ for reference
+3. **Dispatch Subagent**: Fresh eyes critique with specific prompt:
+   ```
+   "Provide critical analysis from these perspectives:
+   1. Practical Implementation
+   2. Backwards Compatibility
+   3. Notation Consistency
+   4. Theoretical Coherence
+   5. User Experience
+   6. Missing Elements
+   Be constructive but honest. End with recommendation."
+   ```
+4. **Synthesize Feedback**: Extract key insights and actionable items
+5. **Iterate**: Revise based on critique or pivot approach
+
+#### When to Use:
+
+- New specifications (like PCHOFF 2.0)
+- Architecture decisions
+- Complex feature designs
+- Process improvements
+- Documentation quality checks
+
+#### Success Factors:
+
+- Give subagent access to ALL relevant context docs
+- Ask for specific perspectives, not general feedback
+- Request concrete examples and recommendations
+- Emphasize constructive criticism over validation
+- Include "missing elements" to catch gaps
+
+**Philosophy**: "TDD for ideas" - test specifications with fresh eyes before implementation!
+
+### 7. Reflection & Documentation Phase
 
 **This is NOT optional!**
 
@@ -83,7 +125,7 @@ Before considering a prompt "done":
    - Any insights or observations
    - Optional: Add to motivational corner (quote, ASCII art, chess move, etc.)
 
-### 7. Commit & Push Phase
+### 8. Commit & Push Phase
 
 ```bash
 # Stage changes
@@ -132,6 +174,8 @@ START
   ↓
 [Implement] ← (If blocked, document it)
   ↓
+[Share the Love] ← (If complex, get fresh eyes)
+  ↓
 [Integrate] ← (If failing, debug systematically)
   ↓
 [Document] ← (If tired, at least update handoff)
@@ -155,6 +199,13 @@ Before committing:
 - [ ] Is the retro written?
 - [ ] Did I add to BULLETIN.md?
 - [ ] Would future-me thank current-me?
+
+For complex designs:
+
+- [ ] Did I use "Sharing the Love" pattern?
+- [ ] Did I get fresh eyes on the specification?
+- [ ] Did I address the critique constructively?
+- [ ] Is the complexity justified by necessity?
 
 ## The Meta-Rule
 

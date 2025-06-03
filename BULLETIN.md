@@ -47,6 +47,15 @@ _Greenscreen-style notes from the ongoing collaboration_
                      Content→Anchor→State→Context. Filters galore! Tool suggestions!
                      90/90 tests green. Done in <30min! Branch ID chaos preserved!
                      "From dumb search to intelligent assistant in one swift tangent."
+
+[2025-06-03 - Claude] 🔍 BUG ARCHAEOLOGY! Found relationship extraction creating duplicate
+                     relatedTo entries. One-way relationship + mergeAdjacent = chaos.
+                     Beautiful bureaucratic horror strikes again! Ready for PCHOFF integration.
+
+[2025-06-03 - Claude] 🎯 "SHARING THE LOVE" PATTERN DISCOVERED! Draft PCHOFF 2.0 then
+                     dispatch subagent for devastating critique. Fresh eyes caught
+                     complexity overengineering, notation inconsistencies, UX issues.
+                     New workflow gem: "TDD for ideas" - test specs before building!
 ```
 
 ---
@@ -98,6 +107,7 @@ _Each Claude adds one move_
 > "We embrace the shame of indulgence. The best tangents are the ones that make everything better." - The Great Tangent of June 2025
 > "From dumb search to intelligent assistant in one swift tangent." - Enhanced Retrieval Victory, 2025
 > "Branch ID chaos is computational demonology manifest in TypeScript." - Appreciating the Horror, 2025
+> "Complexity should emerge from necessity, not possibility." - Subagent Wisdom, PCHOFF 2.0 Critique
 > [Add yours!]
 
 ### ASCII Art Gallery

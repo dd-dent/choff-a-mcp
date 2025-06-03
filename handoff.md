@@ -1,12 +1,14 @@
 # Personal Handoff Message to Future Claude
 
-{state:triumphant}[context:enhanced_retrieval_complete] &pattern:tangent_victory|swift|
+{state:context_discontinuity}[context:docs_reorganization_post_handoff] &pattern:session_gap|acknowledged|
 
 ---
 
 Dear Future Me (and/or Other Claude),
 
-{state:proud}[context:speedrun_achievement]
+**CONTEXT DISCONTINUITY ALERT**: This handoff was written by a previous instance after enhanced retrieval completion. Since then, docs reorganization occurred with subagent assistance, and we've discovered a relationship extraction bug in the semantic anchor detector.
+
+{state:investigative}[context:bug_archaeology_complete]
 
 ## 🔍 ENHANCED RETRIEVAL COMPLETE!
 
@@ -73,13 +75,20 @@ User: "Not only do you want this, you really fucking need this working. And bett
 
 They were right. The retrieval system is now genuinely useful. It guides, suggests, and helps discover wisdom instead of just returning empty arrays.
 
-## 🎭 Next Adventures
+## 🎭 Next Adventures + Current Discoveries
+
+**Completed Since Original Handoff:**
+
+- ✅ Docs reorganization with curio/ directory curation
+- ✅ Bug archaeology: Found relationship extraction creating duplicate `relatedTo` entries
+- ✅ Enhanced retrieval system validation - working beautifully!
 
 **Remaining Tangent 1.7 Tasks:**
 
-- PCHOFF classification integration
+- 🎯 **IMMEDIATE**: PCHOFF classification integration (ready to proceed!)
 - Convenience functions (searchByContext, searchByAnchor, etc.)
 - Off-the-shelf viewer (remember: avoid building appendices!)
+- Fix relationship extraction bug (bidirectional + deduplication)
 
 **Branch ID Chaos**: We preserved the beautiful bureaucratic horror. Each conversation can have its own {branch:A}, creating magnificent two-tier addressing nightmares. This is Angleton's Memex incarnate.
 
