@@ -78,6 +78,31 @@ The `/docs/curio/` directory contains documents of historical, experimental, or 
 
 **When to reference**: Specification interpretation challenges, user intent analysis, notation ambiguity resolution.
 
+### After Action Evaluations & Post-Mortems
+
+#### `aae-cli-linting-crisis.md`
+
+[type:case_study][insight:practical][level:intermediate][temporal:past]
+**CLI linting crisis resolution** - Comprehensive post-mortem of resolving 167 ESLint errors in CLI implementation. Documents automated vs. manual fixes, TypeScript safety improvements, and prevention strategies.
+
+**When to reference**: Linting crisis situations, technical debt resolution strategies, development workflow enforcement.
+
+### Implementation Plans (Historical)
+
+#### `bookmarklet-plan.md`
+
+[type:procedure][insight:direct][level:basic][temporal:past]
+**Browser bookmarklet viewer plan (revised)** - Pragmatic approach to creating minimal viewer solution using inline HTML/CSS/JS served via HTTP API. Represents pivot to simplicity over complexity.
+
+**When to reference**: Simple UI implementation strategies, anti-complexity examples, pragmatic architecture decisions.
+
+#### `viewer-implementation-plan.md`
+
+[type:theory][insight:experimental][level:intermediate][temporal:past]
+**Original viewer implementation plan v1.0** - Initial complex approach using 11ty, Prism.js, and static site generation. Useful as example of architecture planning but represents over-engineering that was later simplified.
+
+**When to reference**: Architecture planning examples, static site generation approaches, complexity vs. simplicity trade-offs.
+
 ---
 
 ## Curation Rationale

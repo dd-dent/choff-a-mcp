@@ -182,10 +182,33 @@ Total tangent: ~1 day → **ACTUAL: <1 hour total! MASSIVE UNDER-DELIVERY ACHIEV
 - ✅ HTTP API: 15 minutes (perfect accuracy!)
 - ✅ TypeScript cleanup: 10 minutes (subagent delegation)
 
-**Remaining Task:**
+### ✅ Web Viewer + Gustav Debugging (COMPLETE!)
 
-- Browser bookmarklet: 15 minutes (simple HTML + fetch)
-- Total viewer solution achieved via composition!
+**What We Built:**
+
+- Complete browser-based viewer at `/viewer` endpoint
+- Server-side HTML generation (no framework dependencies)
+- Real-time search with debouncing (300ms)
+- Format switching: HTML, JSON, Markdown, Text
+- Successfully deployed with user's actual anamnesis!
+
+**The Gustav Bug Hunt Victory:**
+
+- **Mystery**: Viewer showed only 1 result when there should be 6
+- **Investigation**: Systematic debugging of HTML parsing, token limits, caching
+- **Breakthrough**: Human detective work found hardcoded `params.append('limit', '100')`
+- **Solution**: Single line deletion restored full functionality
+- **Lesson**: Meatbag intuition > AI systematic analysis
+
+**Key Insights:**
+
+- Parameter pollution anti-pattern: Frontend overrides poisoning backend logic
+- Token budget cascading: limit=100 caused exhaustion after first result
+- Trust intelligent defaults: Don't hardcode "helpful" parameters
+- Human-AI collaboration: Systematic analysis + detective intuition
+- Simplest fixes are often best: Delete the problem, don't engineer around it
+
+**Total Viewer Solution Achieved!**
 
 ## Why This Matters
 

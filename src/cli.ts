@@ -483,6 +483,8 @@ program
       console.log('\nEndpoints:');
       console.log(`  GET /health - Health check`);
       console.log(`  GET /api/query - Search memory`);
+      console.log(`  GET /viewer - Web interface`);
+      console.log(`\n🌐 Open in browser: http://localhost:${port}/viewer`);
       console.log('\nPress Ctrl+C to stop\n');
 
       // Keep the process running

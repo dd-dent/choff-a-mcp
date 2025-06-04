@@ -1,10 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ChoffHttpServer } from '../../src/http-api.js';
-import http from 'node:http';
 
 describe('ChoffHttpServer', () => {
   let server: ChoffHttpServer;
-  let mockStorage: any;
 
   beforeEach(() => {
     // Mock the storage configuration
@@ -73,7 +71,7 @@ describe('ChoffHttpServer', () => {
       const response = await fetch(`http://localhost:${port}/health`);
 
       expect(response.status).toBe(200);
-      const data = await response.json();
+      const data = (await response.json()) as any;
 
       expect(data).toMatchObject({
         status: 'ok',
@@ -94,7 +92,7 @@ describe('ChoffHttpServer', () => {
       const response = await fetch(`http://localhost:${port}/api/query?q=test`);
 
       expect(response.status).toBe(200);
-      const data = await response.json();
+      const data = (await response.json()) as any;
 
       expect(data).toMatchObject({
         success: true,
@@ -125,7 +123,7 @@ describe('ChoffHttpServer', () => {
       );
 
       expect(response.status).toBe(200);
-      const data = await response.json();
+      const data = (await response.json()) as any;
 
       expect(data.data.metadata.filters).toEqual({
         context: ['technical', 'research'],
@@ -144,7 +142,7 @@ describe('ChoffHttpServer', () => {
       );
 
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data = (await response.json()) as any;
 
       expect(data).toMatchObject({
         success: false,
@@ -163,7 +161,7 @@ describe('ChoffHttpServer', () => {
       );
 
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data = (await response.json()) as any;
 
       expect(data.error.message).toContain('limit');
     });
@@ -213,7 +211,7 @@ describe('ChoffHttpServer', () => {
       const response = await fetch(`http://localhost:${port}/api/query?q=test`);
 
       expect(response.status).toBe(500);
-      const data = await response.json();
+      const data = (await response.json()) as any;
 
       expect(data).toMatchObject({
         success: false,
@@ -282,6 +280,33 @@ describe('ChoffHttpServer', () => {
     });
   });
 
+  describe('viewer endpoint', () => {
+    beforeEach(async () => {
+      server = new ChoffHttpServer(0);
+      await server.start();
+    });
+
+    it('should serve viewer HTML at /viewer', async () => {
+      const port = server.getPort();
+      const response = await fetch(`http://localhost:${port}/viewer`);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('content-type')).toContain('text/html');
+
+      const html = await response.text();
+      expect(html).toContain('CHOFF Memory Viewer');
+      expect(html).toContain('Search your memory...');
+    });
+
+    it('should serve viewer HTML at /viewer.html', async () => {
+      const port = server.getPort();
+      const response = await fetch(`http://localhost:${port}/viewer.html`);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('content-type')).toContain('text/html');
+    });
+  });
+
   describe('request validation', () => {
     beforeEach(async () => {
       server = new ChoffHttpServer(0);
@@ -299,7 +324,7 @@ describe('ChoffHttpServer', () => {
       );
 
       expect(response.status).toBe(414);
-      const data = await response.json();
+      const data = (await response.json()) as any;
       expect(data.error.message).toContain('Request-URI Too Long');
     });
 
@@ -308,7 +333,7 @@ describe('ChoffHttpServer', () => {
       const response = await fetch(`http://localhost:${port}/invalid/path`);
 
       expect(response.status).toBe(404);
-      const data = await response.json();
+      const data = (await response.json()) as any;
       expect(data.error.code).toBe('NOT_FOUND');
     });
 
@@ -319,7 +344,7 @@ describe('ChoffHttpServer', () => {
       });
 
       expect(response.status).toBe(405);
-      const data = await response.json();
+      const data = (await response.json()) as any;
       expect(data.error.message).toContain('Method Not Allowed');
     });
   });

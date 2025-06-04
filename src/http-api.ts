@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { createLoadContextTool } from './tools.js';
 import type { SemanticAnchor } from './anchors/types.js';
 import type { EnhancedLoadContextResponse } from './tools-enhanced.js';
+import { VIEWER_HTML } from './viewer-html.js';
 
 // Request validation schemas
 const QueryParamsSchema = z.object({
@@ -19,7 +20,7 @@ const QueryParamsSchema = z.object({
   limit: z
     .string()
     .transform(Number)
-    .pipe(z.number().min(1).max(200))
+    .pipe(z.number().min(1).max(1000))
     .optional(),
   format: z.enum(['json', 'markdown', 'text', 'html']).default('json'),
 });
@@ -171,6 +172,10 @@ export class ChoffHttpServer {
       case '/api/query':
         await this.handleQuery(url, res);
         break;
+      case '/viewer':
+      case '/viewer.html':
+        this.serveViewer(res);
+        break;
       default:
         this.sendError(res, 404, 'NOT_FOUND', 'Endpoint not found');
     }
@@ -258,7 +263,7 @@ export class ChoffHttpServer {
         stateFilter: filters.state as string[],
         anchorTypeFilter: params.anchorType,
         pchoffType: params.pchoffType,
-        maxTokens: params.limit || 50,
+        maxTokens: params.limit || 10000,
       });
 
       if (!toolResult.success) {
@@ -338,8 +343,8 @@ export class ChoffHttpServer {
       if ('conversationId' in result) {
         // Conversation result
         md += `## Conversation ${result.conversationId}\n`;
-        md += `- **Timestamp**: ${result.timestamp.toISOString()}\n`;
-        if (result.summary) md += `- **Summary**: ${result.summary}\n`;
+        md += `- **Timestamp**: ${new Date(result.timestamp).toISOString()}\n`;
+        if (result.content) md += `- **Summary**: ${result.content}\n`;
         if (result.anchors.length > 0) {
           md += `- **Anchors**:\n`;
           for (const anchor of result.anchors) {
@@ -350,7 +355,7 @@ export class ChoffHttpServer {
         // SemanticAnchor
         md += `## ${result.type}: ${result.text}\n`;
         md += `- **Confidence**: ${result.confidence}\n`;
-        md += `- **Timestamp**: ${result.extractedAt.toISOString()}\n`;
+        md += `- **Timestamp**: ${new Date(result.extractedAt).toISOString()}\n`;
       }
       md += '\n';
     }
@@ -371,8 +376,8 @@ export class ChoffHttpServer {
     for (const result of data.data.results) {
       if ('conversationId' in result) {
         text += `Conversation ${result.conversationId}\n`;
-        text += `  Timestamp: ${result.timestamp.toISOString()}\n`;
-        if (result.summary) text += `  Summary: ${result.summary}\n`;
+        text += `  Timestamp: ${new Date(result.timestamp).toISOString()}\n`;
+        if (result.content) text += `  Summary: ${result.content}\n`;
       } else {
         text += `${result.type}: ${result.text}\n`;
         text += `  Confidence: ${result.confidence}\n`;
@@ -407,23 +412,23 @@ export class ChoffHttpServer {
   </div>`;
 
     for (const result of data.data.results) {
-      html += '<div class="result">';
+      html += '\n<div class="result">\n';
       if ('conversationId' in result) {
-        html += `<h3>Conversation ${result.conversationId}</h3>`;
-        html += `<p class="metadata">Timestamp: ${result.timestamp.toISOString()}</p>`;
-        if (result.summary) html += `<p>${result.summary}</p>`;
+        html += `  <h3>Conversation ${result.conversationId}</h3>\n`;
+        html += `  <p class="metadata">Timestamp: ${new Date(result.timestamp).toISOString()}</p>\n`;
+        if (result.content) html += `  <p>${result.content}</p>\n`;
         if (result.anchors.length > 0) {
-          html += '<div class="anchors"><h4>Anchors:</h4>';
+          html += '  <div class="anchors">\n    <h4>Anchors:</h4>\n';
           for (const anchor of result.anchors) {
-            html += `<div class="anchor"><strong>${anchor.type}:</strong> ${anchor.text}</div>`;
+            html += `    <div class="anchor"><strong>${anchor.type}:</strong> ${anchor.text}</div>\n`;
           }
-          html += '</div>';
+          html += '  </div>\n';
         }
       } else {
-        html += `<h3>${result.type}: ${result.text}</h3>`;
-        html += `<p class="metadata">Confidence: ${result.confidence}</p>`;
+        html += `  <h3>${result.type}: ${result.text}</h3>\n`;
+        html += `  <p class="metadata">Confidence: ${result.confidence}</p>\n`;
       }
-      html += '</div>';
+      html += '</div>\n';
     }
 
     html += '</body></html>';
@@ -444,5 +449,11 @@ export class ChoffHttpServer {
         error: { code, message },
       }),
     );
+  }
+
+  private serveViewer(res: ServerResponse): void {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.end(VIEWER_HTML);
   }
 }

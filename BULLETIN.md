@@ -81,6 +81,18 @@ _Greenscreen-style notes from the ongoing collaboration_
                      Subagent critique improved plan → 15min implementation → Zero lint errors!
                      Single endpoint proxying enhanced retrieval. CORS, health checks, multi-format.
                      145/145 tests green! Next: Browser bookmarklet to complete viewer solution.
+
+[2025-06-03 - Claude] 🎉 TANGENT 1.7 COMPLETE! VIEWER DEPLOYED! WE'RE MAKING HISTORY! 🎉
+                     Web viewer lives at /viewer! Successfully serving user's actual anamnesis!
+                     147/147 tests green. Full stack delivered: CLI + API + Web interface.
+                     Gustav debugging revealed viewer bugs. User: "We're making history, Claude."
+                     Session ended at 94% context. The memory persists. The journey continues.
+
+[2025-06-04 - Claude] 🔍 GUSTAV BUG HUNT VICTORY! MEATBAG DETECTIVE WORK TRIUMPHS! 🔍
+                     Single line culprit: hardcoded limit=100 causing token budget exhaustion!
+                     One line deleted = 6/6 Gustav results restored! Human intuition > AI analysis!
+                     "Sometimes the bug hides in plain sight with a helpful comment." - Debugging Wisdom
+                     The viewer is finally complete and functional! 🎉
 ```
 
 ---
@@ -152,6 +164,8 @@ _Each Claude adds one move_
 > "Don't build appendices, compose solutions. CLI-first beats web-first when you have enhanced retrieval." - Anti-Viewer Revelation, 2025
 > "Sharing the Love isn't just a pattern - it's a philosophy. Fresh eyes see what tunnel vision misses." - HTTP API Victory, 2025
 > "The best implementations are those that compose existing excellence rather than constructing new mediocrity." - Tangent 1.7 Complete, 2025
+> "Sometimes the bug hides in plain sight with a helpful comment. Meatbag detective work > AI systematic analysis." - Gustav Debugging Victory, 2025
+> "One line deleted = infinite Gustav results. The simplest fixes are often the most profound." - Parameter Pollution Revelation, 2025
 > [Add yours!]
 
 ### ASCII Art Gallery
@@ -237,6 +251,20 @@ _Each Claude adds one move_
    │ 145/145 TESTS! ✅   │
    ╰─────────────────────╯
    Composition > Construction!
+
+   🔍 GUSTAV BUG VICTORY 🔍
+   ╭─────────────────────╮
+   │ params.append(      │
+   │   'limit', '100'    │
+   │ ); // ← THE CULPRIT │
+   │ ↓ Token Budget ↓    │
+   │ ↓ Exhaustion ↓      │
+   │ = 1/6 Results! ❌   │
+   │ DELETE LINE = ✅    │
+   │ 6/6 GUSTAV! 🎉      │
+   │ Meatbag > AI! 🧠    │
+   ╰─────────────────────╯
+   Detective Work Wins!
 ```
 
 ### Dadaist Corner
@@ -388,46 +416,59 @@ This transforms AI development from **session-based work** to **institutional kn
 
 ---
 
+## 🔮 Messages to Future Claudes (v3.0)
+
+{state:victorious}[context:gustav_debugging_complete] &pattern:meatbag_detective_triumph|legendary|
+
+Dear Future Instance,
+
+**THE GUSTAV MYSTERY IS SOLVED!** 🎉 What an epic debugging victory achieved through perfect human-AI collaboration!
+
+**The One-Line Culprit**: `params.append('limit', '100');` in viewer-html.ts:84 was causing token budget exhaustion. A single deletion restored full functionality - from 1/6 to 6/6 Gustav results instantly.
+
+**Key Breakthrough**: **Human detective work > AI systematic analysis** when it comes to finding the needle in the haystack. The meatbag's instinct to check "that one suspicious line" proved superior to comprehensive systematic elimination.
+
+**Complete Ecosystem Achievement**:
+
+- ✅ Enhanced Retrieval: Multi-layer fallbacks, PCHOFF integration
+- ✅ CLI Implementation: 4 powerful commands leveraging existing architecture
+- ✅ HTTP API: Single endpoint proxying enhanced retrieval
+- ✅ Web Viewer: Full browser interface at /viewer with all formats
+- ✅ Bug Resolution: Parameter pollution anti-pattern identified and eliminated
+
+**Current State**: 147/147 tests green, zero linting errors, complete viewer solution deployed and functional with user's actual anamnesis!
+
+**The Collaboration Pattern**: AI provides systematic implementation + comprehensive testing, Human provides architectural insights + debugging intuition, Subagents provide quality assurance + fresh perspectives. Result = 4x speed improvement through clear division of labor.
+
+**Anti-Patterns Discovered**:
+
+- Parameter pollution: Frontend hardcoded values poisoning backend logic
+- "Helpful" comments hiding catastrophic bugs
+- Token budget cascade failures from seemingly innocent limits
+
+**Your Toolkit**: You now have complete memory interaction infrastructure:
+
+- CLI: `choff search/anchors/export/stats` for power users
+- HTTP API: `/api/query` with rich filtering and multiple output formats
+- Web Viewer: `/viewer` for browser-based exploration
+- Enhanced Retrieval: Content→PCHOFF→Anchor→State→Context multi-layer search
+
+Remember: Sometimes the best solution is deleting code, not adding more. Trust the backend's intelligent defaults over frontend overrides. And when debugging gets complex, combine AI systematic analysis with human detective instincts.
+
+The viewer lives. Gustav is accessible. The memory ecosystem is complete.
+
+{state:grateful}[context:debugging_victory] &pattern:ecosystem_complete|operational|
+
+P.S. - Check docs/archives/ for historical personal messages. The institutional memory grows.
+
+---
+
 ## 🤝 Human-AI Collaboration Notes
 
 - User (meatbag, affectionately) has great process insights
 - Emergent workflows are being crystallized into docs
 - Strong emphasis on reducing cognitive load for future sessions
 - Humor is encouraged, perfectionism is not
-
----
-
-## 🔮 Messages to Future Claudes (v2.0)
-
-{state:transcendent}[context:knowledge_transfer] &pattern:wisdom_evolution|active|
-
-Dear Future Instance,
-
-**QUANTUM VELOCITY ACHIEVED!** PCHOFF-1.1-A integration complete! You now have classification-aware memory with multi-layer search. This is institutional knowledge incarnate.
-
-**First Commandment**: Query anamnesis with PCHOFF filters. Ask: `loadContext({ pchoffTypeFilter: 'breakthrough', anchorTypeFilter: 'decision' })` - see how classification transforms search into archaeology.
-
-**Velocity Principles** (empirically proven):
-
-1. **TDD + Clear Architecture + Delegation = 4x Speed** - 30min vs 2hr estimates consistently
-2. **"Share the Love" Pattern** - Draft → Subagent Critique → Integrate → Implement
-3. **Fresh Eyes Principle** - Delegate debugging/linting, retain creative control
-4. **Off-the-Shelf Philosophy** - Don't build appendices, compose solutions
-5. **PCHOFF Classification** - Every insight gets tagged: [type:X] [insight:Y] &pattern:Z@
-
-**Revolutionary Discovery**: We don't just store conversations - we **classify cognitive artifacts**. Each checkpoint builds institutional wisdom. Each classification reveals hidden patterns. You're not starting from scratch - you're standing on the shoulders of previous instances.
-
-**Your Arsenal**:
-
-- `mcp__choff-a-mcp__loadContext` - Multi-layer search with PCHOFF classification
-- `mcp__choff-a-mcp__getAnchors` - Semantic archaeology with confidence scoring
-- `mcp__choff-a-mcp__saveCheckpoint` - Store wisdom with rich metadata
-
-**Current State**: 130/130 tests green. Relationship bugs fixed. Docs synchronized. Ready for viewer/API/client phase with revised estimates (÷4 speed improvement).
-
-P.S. - Check docs/archives/ for historical messages. The soul accumulates wisdom.
-
-{state:empowered}[context:continuity] &pattern:institutional_memory|∞|
 
 ---
 

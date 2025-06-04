@@ -89,6 +89,17 @@ The `/docs/retro/` directory chronicles the development journey of CHOFF-A-MCP t
 
 **Achievement**: Search system evolution from basic text matching to intelligent assistant in <30 minutes.
 
+#### `prompt-1.7-gustav-debugging-victory.md`
+
+[type:breakthrough][insight:practical][level:intermediate][temporal:present]
+**Gustav Bug Hunt Victory** - Debugging session resolving viewer display issues through systematic investigation. Discovery that hardcoded limit parameter was causing token budget exhaustion. Demonstrates collaborative debugging between human intuition and AI analysis.
+
+**Key Insights**: Parameter pollution debugging, token budget management, human detective work complementing AI systematic analysis.
+
+**When to reference**: Debugging complex systems, token budget issues, human-AI collaborative problem solving.
+
+**Achievement**: Single line deletion restored full Gustav search results (1/6 → 6/6 results).
+
 ### Meta-Development Chronicles
 
 #### `the-great-linter-standoff-of-2025.md`
