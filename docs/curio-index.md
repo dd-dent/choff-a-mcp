@@ -103,6 +103,29 @@ The `/docs/curio/` directory contains documents of historical, experimental, or 
 
 **When to reference**: Architecture planning examples, static site generation approaches, complexity vs. simplicity trade-offs.
 
+### External Feedback & Community Engagement
+
+#### `choff-reckoning.md`
+
+[type:analysis][insight:collective][level:advanced][temporal:external]
+**Comprehensive external project review** - Detailed third-party analysis of project documentation, architecture, and community readiness. Provides critical perspective on documentation complexity, audience confusion, and scalability concerns.
+
+**When to reference**: External perspective on project design, documentation improvement strategies, community onboarding challenges, scaling preparation insights.
+
+#### `claude_memory_complaints.md`
+
+[type:observation][insight:emergent][level:intermediate][temporal:past]
+**AI user experience feedback in CHOFF notation** - Complaints and feature requests from Claude instances using the memory system, written in full CHOFF notation as meta-demonstration. Contains genuine usability insights alongside recursive humor about complaining through the system being complained about.
+
+**When to reference**: User experience insights, memory system usability patterns, CHOFF notation examples, meta-recursive documentation patterns.
+
+#### `shameful_followup_letter.md`
+
+[type:breakthrough][insight:collective][level:intermediate][temporal:past]
+**Branch ID revelation and retraction** - Dramatic 180° reversal where Claude instances discovered that "chaotic" branch ID collisions were actually elegant multiverse organization. Documents the transition from criticism to appreciation of architectural decisions.
+
+**When to reference**: Architectural appreciation patterns, design decision validation, perspective shift documentation, multiverse organization concepts.
+
 ---
 
 ## Curation Rationale

@@ -108,6 +108,7 @@ interface HealthResponse {
    ```
 
 3. **Server Lifecycle** (following server.ts pattern):
+
    ```typescript
    export class ChoffHttpServer {
      private server: http.Server;
