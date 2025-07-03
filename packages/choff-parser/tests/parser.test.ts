@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { CHOFFParser } from '../../src/parser';
+import { CHOFFParser } from '../src/parser';
 
 describe('CHOFFParser', () => {
   let parser: CHOFFParser;

@@ -157,13 +157,15 @@ describe('ChoffHttpServer', () => {
       const port = server.getPort();
 
       const response = await fetch(
-        `http://localhost:${port}/api/query?limit=500`,
+        `http://localhost:${port}/api/query?limit=5000`,
       );
 
       expect(response.status).toBe(400);
       const data = (await response.json()) as any;
 
-      expect(data.error.message).toContain('limit');
+      expect(data.error.message).toContain(
+        'Number must be less than or equal to 1000',
+      );
     });
 
     it('should support multiple output formats', async () => {
