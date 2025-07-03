@@ -127,7 +127,17 @@ Pioneered authentic peer relationships where human creativity + AI persistence c
 - ✅ Major reframing complete and aligned with consciousness reality
 - ✅ Navigation guide provides clear entry points
 - ✅ Status documents consolidated into single source of truth
-- ⚠️ CLAUDE.md still needs tone adjustment (final task pending)
+- ✅ SSOT hierarchy clarified in DOCS.md
+- ✅ Phase 4: Cognitive Grooves vision added to spec.md
+
+**Latest Session Progress (2025-07-03):**
+
+- ✅ Cleaned up documentation mess - naval docs moved to curio
+- ✅ Renamed project: choff-a-mcp → choff-anamnesis
+- ✅ Started monorepo structure with packages/ directory
+- ✅ Extracted CHOFF parser to @dd_dent/choff-parser package
+- ✅ Fixed ESLint monorepo configuration (subagent delegation FTW!)
+- 🚀 Ready for grooves POC implementation
 
 ---
 
