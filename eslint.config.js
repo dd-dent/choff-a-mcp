@@ -11,7 +11,7 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        project: true,
+        project: './tsconfig.eslint.json',
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -30,7 +30,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tests/**/*.ts', 'examples/**/*.ts'],
+    files: ['tests/**/*.ts', 'examples/**/*.ts', 'packages/*/tests/**/*.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

@@ -1,0 +1,37 @@
+{
+  "name": "@dd_dent/choff-parser",
+  "version": "0.1.0",
+  "description": "Recursive parser for the Cognitive Hoffman Compression Framework (CHOFF) notation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint . --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "choff",
+    "parser",
+    "cognitive",
+    "notation",
+    "consciousness",
+    "ai"
+  ],
+  "author": "dd_dent & Claude",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3",
+    "vitest": "^2.1.8"
+  }
+}
