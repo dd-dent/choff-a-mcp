@@ -327,7 +327,6 @@ export function createLoadContextTool(): MCPTool<
         // Use enhanced retrieval
         const enhancedRetrieval = new EnhancedRetrieval(storage);
         const result = await enhancedRetrieval.searchWithFallbacks(validated);
-        console.log(`Enhanced retrieval result: ${JSON.stringify(result)}`);
 
         return {
           success: true,
