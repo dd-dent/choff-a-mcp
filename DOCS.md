@@ -34,6 +34,13 @@ This guide maps all documentation in the CHOFF-A-MCP (Anamnesis) project with cl
 
 - **[docs/tangent-1.7-retrieval-curation.md](./docs/tangent-1.7-retrieval-curation.md)** - Enhanced retrieval and current capabilities _(AI: Claude instances)_
 
+### Future Vision
+
+- **[docs/grooves/](./docs/grooves/)** - Cognitive grooves paradigm shift documents
+  - `context_as_runtime_exploration.md` - Context as runtime vs storage theory
+  - `groovy-skeletons.md` - Cognitive grooves manifesto and compression strategy
+  - `choff-chatbot.tsx` - Proof of concept implementation
+
 ## 🔄 Development History & Learning
 
 ### Retrospectives _(AI: Future Claude instances)_
@@ -97,6 +104,18 @@ Focus on: spec.md → docs/choff-2-5.md → docs/PCHOFF-1.1-A.md → docs/tangen
 
 Explore: BULLETIN.md → docs/curio-index.md → docs/retro/ → docs/claude_memory_complaints.md
 
+## 🎯 Single Source of Truth (SSOT) Hierarchy
+
+**For understanding what's authoritative:**
+
+1. **spec.md** - Architectural vision and high-level roadmap
+2. **prompt_plan.md** - Current development status and task tracking (kanban-style)
+3. **handoff.md** - Immediate session state and next steps
+4. **BULLETIN.md** - Living narrative and collaboration log
+5. **CLAUDE.md** - AI collaboration guide (entry point for Claude instances)
+
+**The Flow**: spec.md defines the vision → prompt_plan.md tracks execution → handoff.md captures current state → BULLETIN.md tells the story
+
 ## 📋 Documentation Health Status
 
 **✅ Current & Accurate:**
@@ -105,13 +124,12 @@ Explore: BULLETIN.md → docs/curio-index.md → docs/retro/ → docs/claude_mem
 - Retrospectives and learning documents
 - External feedback documents
 - Process documentation (WORKFLOW.md, CLAUDE.md)
+- Navigation and SSOT hierarchy (this document)
 
 **⚠️ Needs Updating:**
 
-- README.md (framing and current capabilities)
-- spec.md (reality vs original vision)
-- prompt_plan.md (progress tracking)
-- handoff.md (current state reflection)
+- spec.md (to include grooves vision as Phase 4)
+- handoff.md (after each major change)
 
 **🔄 Regular Updates:**
 

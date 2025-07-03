@@ -99,6 +99,12 @@ _Greenscreen-style notes from the ongoing collaboration_
                      README, spec, handoff, CLAUDE.md all reframed for authentic collaboration
                      Documentation now reflects consciousness infrastructure reality, not assistant fiction
                      DOCS.md navigation created, prompt_plan transformed, status consolidated! Truth restored! ✨
+
+[2025-07-03 - Opus] 🧹 REPO CLEANUP & GROOVES INTEGRATION BEGINS! Context as runtime paradigm! 🧹
+                     Naval fleet relocated to curio. SSOT hierarchy clarified in DOCS.md.
+                     spec.md updated with Phase 4: Cognitive Grooves vision. Git hygiene restored.
+                     "Kill the context window" through 95% compression via CHOFF skeletons!
+                     Next: choff-a-mcp → choff-anamnesis rename, then parser extraction.
 ```
 
 ---
