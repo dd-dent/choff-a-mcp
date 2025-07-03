@@ -245,7 +245,7 @@ export class EnhancedRetrieval {
       query: args.query,
       searchStrategy,
       fallbackStrategy,
-      suggestions: results.length === 0 ? suggestions : undefined,
+      suggestions: results.length === 0 ? suggestions : [],
       availableContexts:
         results.length === 0 ? availableFilters.contexts : undefined,
       availableStates:
@@ -596,19 +596,79 @@ export class EnhancedRetrieval {
   ): string[] {
     const suggestions: string[] = [];
 
-    if (results.length === 0 && args.query) {
+    // Only suggest for empty results
+    if (results.length === 0) {
       suggestions.push('No results found. Try:');
-      suggestions.push(
-        '- Try searching for anchor types: decision, breakthrough, question, blocker',
-      );
-      suggestions.push(
-        `- Filtering by context: ${availableFilters.contexts.slice(0, 3).join(', ')}`,
-      );
-      suggestions.push(
-        `- Searching for states: ${availableFilters.states.slice(0, 3).join(', ')}`,
-      );
-      suggestions.push('- Using broader search terms');
-      suggestions.push('- Checking time range filters');
+
+      // Track what filters have been applied
+      const appliedFilters = {
+        hasContext: !!args.contextFilter,
+        hasState: !!args.stateFilter,
+        hasAnchorType: !!args.anchorTypeFilter,
+        hasTimeRange: !!args.timeRange,
+        hasPCHOFF: !!(
+          args.pchoffType ||
+          args.pchoffInsight ||
+          args.pchoffLevel
+        ),
+      };
+
+      let suggestionCount = 0;
+      const maxSuggestions = 2;
+
+      // Priority 1: Suggest unused filter types with examples
+      if (!appliedFilters.hasAnchorType && suggestionCount < maxSuggestions) {
+        suggestions.push(
+          'Try anchor types: anchorTypeFilter: "decision" or "breakthrough"',
+        );
+        suggestionCount++;
+      }
+
+      if (
+        !appliedFilters.hasContext &&
+        availableFilters.contexts.length > 0 &&
+        suggestionCount < maxSuggestions
+      ) {
+        const contextExamples = availableFilters.contexts
+          .slice(0, 2)
+          .join('" or "');
+        suggestions.push(
+          `Filter by context: contextFilter: "${contextExamples}"`,
+        );
+        suggestionCount++;
+      }
+
+      if (
+        !appliedFilters.hasState &&
+        availableFilters.states.length > 0 &&
+        suggestionCount < maxSuggestions
+      ) {
+        const stateExamples = availableFilters.states
+          .slice(0, 2)
+          .join('" or "');
+        suggestions.push(`Search by state: stateFilter: "${stateExamples}"`);
+        suggestionCount++;
+      }
+
+      // Priority 2: If all filter types are used, suggest broader search
+      if (suggestionCount === 0) {
+        if (args.query && args.query.length > 20) {
+          suggestions.push('Use shorter or more general search terms');
+          suggestionCount++;
+        } else {
+          suggestions.push(
+            'Try broader search terms like "implementation" or "design"',
+          );
+          suggestionCount++;
+        }
+
+        if (appliedFilters.hasTimeRange && suggestionCount < maxSuggestions) {
+          suggestions.push(
+            'Remove timeRange filter to search all conversations',
+          );
+          suggestionCount++;
+        }
+      }
     }
 
     return suggestions;

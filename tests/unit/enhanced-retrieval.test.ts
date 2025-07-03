@@ -153,9 +153,17 @@ Consider performance and simplicity trade-offs.`;
 
       expect(data.contexts).toHaveLength(0);
       expect(data.suggestions).toBeDefined();
-      expect(data.suggestions).toContain(
-        '- Try searching for anchor types: decision, breakthrough, question, blocker',
-      );
+      // Check that we have the header and at most 2 actual suggestions
+      expect(data.suggestions[0]).toBe('No results found. Try:');
+      expect(data.suggestions.length).toBeGreaterThan(1);
+      expect(data.suggestions.length).toBeLessThanOrEqual(3); // header + 2 suggestions max
+      // Check that suggestions contain examples
+      const actualSuggestions = data.suggestions.slice(1);
+      actualSuggestions.forEach((suggestion: string) => {
+        expect(suggestion).toMatch(
+          /anchorTypeFilter:|contextFilter:|stateFilter:|broader|general/,
+        );
+      });
       expect(data.availableContexts).toContain('technical');
       expect(data.availableStates).toContain('analytical');
     });
