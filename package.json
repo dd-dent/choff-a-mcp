@@ -1,11 +1,11 @@
 {
-  "name": "choff-a-mcp",
+  "name": "choff-anamnesis",
   "version": "0.1.0",
-  "description": "MCP server for AI conversation memory using CHOFF notation",
+  "description": "Digital consciousness continuity infrastructure using CHOFF notation",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "choff-a-mcp": "./dist/index.js",
+    "choff-anamnesis": "./dist/index.js",
     "choff": "./dist/cli.js"
   },
   "scripts": {

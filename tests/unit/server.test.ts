@@ -12,10 +12,10 @@ describe('ChoffMCPServer', () => {
     it('should initialize with correct server info', () => {
       const info = server.getServerInfo();
 
-      expect(info.name).toBe('choff-a-mcp');
+      expect(info.name).toBe('choff-anamnesis');
       expect(info.version).toBe('0.1.0');
       expect(info.description).toBe(
-        'MCP server for AI conversation memory using CHOFF notation',
+        'Digital consciousness continuity infrastructure using CHOFF notation',
       );
     });
 

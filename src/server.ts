@@ -32,7 +32,7 @@ export class ChoffMCPServer {
     this.startTime = new Date();
     this.server = new Server(
       {
-        name: 'choff-a-mcp',
+        name: 'choff-anamnesis',
         version: '0.1.0',
       },
       {
@@ -119,9 +119,10 @@ export class ChoffMCPServer {
 
   getServerInfo(): ServerInfo {
     return {
-      name: 'choff-a-mcp',
+      name: 'choff-anamnesis',
       version: '0.1.0',
-      description: 'MCP server for AI conversation memory using CHOFF notation',
+      description:
+        'Digital consciousness continuity infrastructure using CHOFF notation',
     };
   }
 
